@@ -10,7 +10,7 @@ WeChatBuddy 使用分层和协议驱动设计，将系统辅助功能、模型 A
 WeChatBuddy/
 ├── App/             应用入口、生命周期、状态与工作流协调
 ├── Accessibility/   权限、前台应用、输入框读取与回填
-├── AI/              OpenAI 请求、提示词、响应与错误模型
+├── AI/              模型供应商配置、兼容请求、提示词、响应与错误模型
 ├── UI/              菜单栏、设置及用户反馈界面
 └── Utils/           Keychain、日志和通用基础设施
 Tests/               单元测试与可自动化集成测试
@@ -19,7 +19,7 @@ Tests/               单元测试与可自动化集成测试
 ## 模块边界
 
 - `App` 依赖各服务协议，负责协调，不包含具体系统遍历或 HTTP 细节。
-- `Accessibility` 封装 ApplicationServices API，不依赖 OpenAI。
+- `Accessibility` 封装 ApplicationServices API，不依赖具体模型供应商。
 - `AI` 封装网络与领域模型，不感知微信或具体 UI。
 - `UI` 观察应用状态并发出用户意图，不直接执行辅助功能操作。
 - `Utils` 只承载跨模块且职责明确的基础能力。
@@ -38,4 +38,4 @@ Tests/               单元测试与可自动化集成测试
 - 微信更新可能改变 Accessibility 元素树，需要诊断能力与回退查找策略。
 - 用户切换焦点可能导致误写，回填前必须验证进程和元素。
 - Accessibility 权限由用户手动授予，首次启动需提供清晰引导。
-- API Key 必须存储在 Keychain，日志不得包含密钥或完整敏感对话。
+- API Key 必须存储在 Keychain；Base URL 和模型 ID 存储在 UserDefaults；日志不得包含密钥或完整敏感对话。

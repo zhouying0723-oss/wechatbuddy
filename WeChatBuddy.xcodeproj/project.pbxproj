@@ -24,6 +24,10 @@
 		A1000000000000000000000F /* KeychainAPIKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012 /* KeychainAPIKeyStore.swift */; };
 		A10000000000000000000010 /* APIKeySettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000013 /* APIKeySettingsModel.swift */; };
 		A10000000000000000000011 /* APIKeySettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000014 /* APIKeySettingsTests.swift */; };
+		A10000000000000000000012 /* ModelProviderConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000015 /* ModelProviderConfiguration.swift */; };
+		A10000000000000000000013 /* ModelProviderSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000016 /* ModelProviderSettingsStore.swift */; };
+		A10000000000000000000014 /* ModelProviderSettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000017 /* ModelProviderSettingsModel.swift */; };
+		A10000000000000000000015 /* ModelProviderSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000018 /* ModelProviderSettingsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +61,10 @@
 		A20000000000000000000012 /* KeychainAPIKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainAPIKeyStore.swift; sourceTree = "<group>"; };
 		A20000000000000000000013 /* APIKeySettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeySettingsModel.swift; sourceTree = "<group>"; };
 		A20000000000000000000014 /* APIKeySettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeySettingsTests.swift; sourceTree = "<group>"; };
+		A20000000000000000000015 /* ModelProviderConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelProviderConfiguration.swift; sourceTree = "<group>"; };
+		A20000000000000000000016 /* ModelProviderSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelProviderSettingsStore.swift; sourceTree = "<group>"; };
+		A20000000000000000000017 /* ModelProviderSettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelProviderSettingsModel.swift; sourceTree = "<group>"; };
+		A20000000000000000000018 /* ModelProviderSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelProviderSettingsTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +133,7 @@
 				A20000000000000000000003 /* MenuBarContent.swift */,
 				A20000000000000000000004 /* SettingsView.swift */,
 				A20000000000000000000013 /* APIKeySettingsModel.swift */,
+				A20000000000000000000017 /* ModelProviderSettingsModel.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -134,6 +143,7 @@
 			children = (
 				A20000000000000000000007 /* AppStatusTests.swift */,
 				A20000000000000000000014 /* APIKeySettingsTests.swift */,
+				A20000000000000000000018 /* ModelProviderSettingsTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -164,6 +174,8 @@
 			children = (
 				A2000000000000000000000B /* TextRewriting.swift */,
 				A20000000000000000000012 /* KeychainAPIKeyStore.swift */,
+				A20000000000000000000015 /* ModelProviderConfiguration.swift */,
+				A20000000000000000000016 /* ModelProviderSettingsStore.swift */,
 			);
 			path = AI;
 			sourceTree = "<group>";
@@ -280,9 +292,12 @@
 				A1000000000000000000000E /* WeChatInputWriter.swift in Sources */,
 				A10000000000000000000008 /* TextRewriting.swift in Sources */,
 				A1000000000000000000000F /* KeychainAPIKeyStore.swift in Sources */,
+				A10000000000000000000012 /* ModelProviderConfiguration.swift in Sources */,
+				A10000000000000000000013 /* ModelProviderSettingsStore.swift in Sources */,
 				A10000000000000000000003 /* MenuBarContent.swift in Sources */,
 				A10000000000000000000004 /* SettingsView.swift in Sources */,
 				A10000000000000000000010 /* APIKeySettingsModel.swift in Sources */,
+				A10000000000000000000014 /* ModelProviderSettingsModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -292,6 +307,7 @@
 			files = (
 				A10000000000000000000005 /* AppStatusTests.swift in Sources */,
 				A10000000000000000000011 /* APIKeySettingsTests.swift in Sources */,
+				A10000000000000000000015 /* ModelProviderSettingsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,7 +359,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.8.0;
+				MARKETING_VERSION = 0.9.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -364,7 +380,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.8.0;
+				MARKETING_VERSION = 0.9.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

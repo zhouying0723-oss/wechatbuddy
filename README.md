@@ -1,12 +1,12 @@
 # WeChatBuddy
 
-WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微信输入框中输入草稿后，通过全局快捷键 `Command + Shift + R` 触发文本优化；应用读取当前输入框内容，调用 OpenAI API 完成纠错、润色和语气优化，再将结果写回输入框，由用户确认并手动发送。
+WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微信输入框中输入草稿后，通过全局快捷键 `Command + Shift + R` 触发文本优化；应用读取当前输入框内容，调用火山方舟等 OpenAI 协议兼容模型服务完成纠错、润色和语气优化，再将结果写回输入框，由用户确认并手动发送。
 
 ## 项目状态
 
-当前版本：`v0.8.0`
+当前版本：`v0.9.0`
 
-当前阶段：阶段 3，OpenAI API 集成。
+当前阶段：阶段 3，模型 API 集成。
 
 ## 核心原则
 
@@ -16,7 +16,8 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 - 安全写回时只替换输入框草稿，不模拟发送操作。
 - 通过系统级 `Command + Shift + R` 快捷键触发草稿读取。
 - 应用只改写草稿，不自动发送消息。
-- OpenAI API Key 仅保存在 macOS Keychain，不写入代码、日志或 Git。
+- 模型服务 API Key 仅保存在 macOS Keychain，不写入代码、日志或 Git。
+- 火山方舟为默认供应商，Base URL 与模型 ID 可在设置页配置。
 - 所有开发在 `feature/*` 分支完成，经确认后再合并到 `main`。
 - 每个独立功能小步提交，并同步维护 `PROJECT.md` 与 `CHANGELOG.md`。
 
@@ -38,7 +39,7 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 - SwiftUI
 - AppKit（菜单栏及必要的 macOS 生命周期集成）
 - ApplicationServices / Accessibility API
-- URLSession（OpenAI API）
+- URLSession（火山方舟及 OpenAI 协议兼容 API）
 - Security / Keychain Services（密钥存储）
 - XCTest
 - Xcode 与 Git

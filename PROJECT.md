@@ -2,7 +2,7 @@
 
 ## 项目目标
 
-开发一个支持 Apple Silicon 的 macOS 菜单栏应用。用户在微信输入框中按下 `Command + Shift + R` 后，应用读取草稿，通过 OpenAI API 完成错别字纠正、表达润色、自然化和场景语气优化，再把结果写回原输入框。消息始终由用户检查并手动发送。
+开发一个支持 Apple Silicon 的 macOS 菜单栏应用。用户在微信输入框中按下 `Command + Shift + R` 后，应用读取草稿，通过火山方舟等 OpenAI 协议兼容模型服务完成错别字纠正、表达润色、自然化和场景语气优化，再把结果写回原输入框。消息始终由用户检查并手动发送。
 
 ## 技术架构
 
@@ -23,9 +23,9 @@
 
 - `HotKeyService`：注册和处理全局快捷键。
 - `AccessibilityService`：权限检查、前台应用识别、焦点元素读取和写入。
-- `OpenAIService`：请求构建、响应解析、超时和错误映射。
-- `KeychainService`：安全保存 OpenAI API Key。
-- `SettingsStore`：保存非敏感偏好。
+- `ModelAPIService`：火山方舟兼容请求构建、响应解析、超时和错误映射。
+- `KeychainService`：安全保存模型服务 API Key。
+- `SettingsStore`：保存供应商、Base URL、模型 ID 等非敏感偏好。
 
 详细目录职责、依赖边界及数据流见 `docs/architecture.md`。
 
@@ -93,10 +93,11 @@
 - [x] 写回文本并处理控件变化
 - [x] 在微信 4.1.11 上完成读取手工测试
 
-### 阶段 3：OpenAI API 集成（当前）
+### 阶段 3：模型 API 集成（当前）
 
 - [x] Keychain 安全存储 API Key
-- [ ] 实现 OpenAI 请求与响应解析
+- [x] 配置火山方舟 Base URL 与模型 ID
+- [ ] 实现火山方舟兼容请求与响应解析
 - [ ] 设计改写提示词和语气选项
 - [ ] 添加超时、取消、限流和错误处理
 - [ ] 使用模拟网络响应完成单元测试
@@ -143,6 +144,7 @@
 - 完成微信 4.1.11 草稿写回人工验收，确认未自动发送且原剪贴板正常恢复。
 - 新增 Keychain API Key 存储、设置页安全输入以及保存和删除状态管理。
 - 完成签名 App 的 Keychain 人工验收，确认保存、重启读取状态和删除均正常。
+- 新增火山方舟供应商配置、HTTPS Base URL 校验、模型 ID 校验和非敏感配置持久化。
 - 新增仓库级 `AGENTS.md`，固化影响分析、测试、提交和变更日志流程。
 
 ## 待开发任务

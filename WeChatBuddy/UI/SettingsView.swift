@@ -2,32 +2,58 @@ import AppKit
 import SwiftUI
 
 struct SettingsView: View {
-    @StateObject private var model: APIKeySettingsModel
+    @StateObject private var apiKeyModel: APIKeySettingsModel
+    @StateObject private var providerModel: ModelProviderSettingsModel
 
-    init(store: any APIKeyStoring = KeychainAPIKeyStore()) {
-        _model = StateObject(
-            wrappedValue: APIKeySettingsModel(store: store)
+    init(
+        apiKeyStore: any APIKeyStoring = KeychainAPIKeyStore(),
+        providerStore: any ModelProviderSettingsStoring =
+            UserDefaultsModelProviderSettingsStore()
+    ) {
+        _apiKeyModel = StateObject(
+            wrappedValue: APIKeySettingsModel(store: apiKeyStore)
+        )
+        _providerModel = StateObject(
+            wrappedValue: ModelProviderSettingsModel(store: providerStore)
         )
     }
 
     var body: some View {
         Form {
-            Section("OpenAI API") {
-                SecureField("输入 API Key", text: $model.input)
+            Section("模型服务") {
+                LabeledContent("供应商", value: providerModel.provider.title)
+
+                TextField("Base URL", text: $providerModel.baseURL)
                     .textFieldStyle(.roundedBorder)
 
-                Text(model.status.title)
+                TextField("模型 ID", text: $providerModel.modelID)
+                    .textFieldStyle(.roundedBorder)
+
+                Text(providerModel.status.title)
                     .font(.caption)
-                    .foregroundStyle(statusColor)
+                    .foregroundStyle(providerStatusColor)
+
+                Button("保存模型配置") {
+                    providerModel.save()
+                }
+            }
+
+            Section("火山方舟 API Key") {
+                SecureField("输入 API Key", text: $apiKeyModel.input)
+                    .textFieldStyle(.roundedBorder)
+
+                Text(apiKeyModel.status.title)
+                    .font(.caption)
+                    .foregroundStyle(apiKeyStatusColor)
 
                 HStack {
                     Button("保存") {
-                        model.save()
+                        apiKeyModel.save()
                     }
-                    .disabled(!model.canSave)
+                    .disabled(!apiKeyModel.canSave)
 
                     Button("删除", role: .destructive) {
-                        model.delete()
+                        apiKeyModel.delete()
                     }
                 }
 
@@ -38,20 +64,32 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding(12)
-        .frame(width: 460, height: 240)
+        .frame(width: 500, height: 430)
         .onAppear {
             NSApplication.shared.activate(ignoringOtherApps: true)
-            model.refresh()
+            providerModel.refresh()
+            apiKeyModel.refresh()
         }
     }
 
-    private var statusColor: Color {
-        switch model.status {
+    private var apiKeyStatusColor: Color {
+        switch apiKeyModel.status {
         case .failure:
             .red
         case .saved:
             .green
         case .unknown, .notSaved:
+            .secondary
+        }
+    }
+
+    private var providerStatusColor: Color {
+        switch providerModel.status {
+        case .failure:
+            .red
+        case .saved:
+            .green
+        case .ready:
             .secondary
         }
     }
