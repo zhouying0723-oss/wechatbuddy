@@ -54,7 +54,9 @@ final class RewriteCoordinator: RewriteCoordinating {
         let result = try await textRewriter.rewrite(
             RewriteRequest(
                 text: originalDraft,
-                tone: preferencesStore.loadTone()
+                tone: preferencesStore.loadTone(),
+                customInstruction:
+                    preferencesStore.loadCustomInstruction()
             )
         )
 

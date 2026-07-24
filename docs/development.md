@@ -48,3 +48,11 @@
 - 可测试逻辑需通过对应单元测试。
 - Accessibility 与微信交互需记录 macOS、微信版本和人工测试结果。
 - 禁止提交 API Key、签名凭据、个人配置及构建产物。
+
+## 发布构建
+
+- 使用仓库共享的 `WeChatBuddy` Scheme。
+- 本机无签名验收包通过 `scripts/build-local-release.sh` 生成。
+- `build/` 中的归档和压缩包不得提交到 Git。
+- 公开分发包必须使用 Developer ID 签名并通过 Apple 公证。
+- 完整步骤和检查项见 `docs/release.md`。

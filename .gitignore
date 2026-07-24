@@ -1,6 +1,8 @@
 # Xcode
 DerivedData/
 build/
+*.xcarchive
+*-local-unsigned.zip
 *.xcuserstate
 xcuserdata/
 *.xccheckout

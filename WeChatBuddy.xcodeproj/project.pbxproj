@@ -39,6 +39,9 @@
 		A1000000000000000000001E /* ModelTextRewriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000021 /* ModelTextRewriter.swift */; };
 		A1000000000000000000001F /* RewriteCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000022 /* RewriteCoordinator.swift */; };
 		A10000000000000000000020 /* RewriteCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000023 /* RewriteCoordinatorTests.swift */; };
+		A10000000000000000000021 /* DiagnosticReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000024 /* DiagnosticReport.swift */; };
+		A10000000000000000000022 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000025 /* OnboardingView.swift */; };
+		A10000000000000000000023 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000026 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,6 +90,9 @@
 		A20000000000000000000021 /* ModelTextRewriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTextRewriter.swift; sourceTree = "<group>"; };
 		A20000000000000000000022 /* RewriteCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewriteCoordinator.swift; sourceTree = "<group>"; };
 		A20000000000000000000023 /* RewriteCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewriteCoordinatorTests.swift; sourceTree = "<group>"; };
+		A20000000000000000000024 /* DiagnosticReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticReport.swift; sourceTree = "<group>"; };
+		A20000000000000000000025 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		A20000000000000000000026 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +131,8 @@
 				A40000000000000000000008 /* Accessibility */,
 				A40000000000000000000009 /* AI */,
 				A40000000000000000000005 /* UI */,
+				A4000000000000000000000A /* Utils */,
+				A4000000000000000000000B /* Resources */,
 				A20000000000000000000005 /* Info.plist */,
 			);
 			path = WeChatBuddy;
@@ -159,6 +167,7 @@
 				A20000000000000000000017 /* ModelProviderSettingsModel.swift */,
 				A2000000000000000000001C /* ModelConnectionTestModel.swift */,
 				A2000000000000000000001F /* RewritePreferencesModel.swift */,
+				A20000000000000000000025 /* OnboardingView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -211,6 +220,22 @@
 				A20000000000000000000021 /* ModelTextRewriter.swift */,
 			);
 			path = AI;
+			sourceTree = "<group>";
+		};
+		A4000000000000000000000A /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000024 /* DiagnosticReport.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		A4000000000000000000000B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000026 /* Assets.xcassets */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -297,6 +322,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000000000000000000023 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,6 +360,8 @@
 				A1000000000000000000001C /* RewritePreferencesModel.swift in Sources */,
 				A1000000000000000000001E /* ModelTextRewriter.swift in Sources */,
 				A1000000000000000000001F /* RewriteCoordinator.swift in Sources */,
+				A10000000000000000000021 /* DiagnosticReport.swift in Sources */,
+				A10000000000000000000022 /* OnboardingView.swift in Sources */,
 				A10000000000000000000003 /* MenuBarContent.swift in Sources */,
 				A10000000000000000000004 /* SettingsView.swift in Sources */,
 				A10000000000000000000010 /* APIKeySettingsModel.swift in Sources */,
@@ -392,6 +420,7 @@
 		AA0000000000000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
@@ -403,7 +432,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.14.1;
+				MARKETING_VERSION = 0.20.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -414,6 +443,7 @@
 		AA0000000000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
@@ -424,7 +454,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.14.1;
+				MARKETING_VERSION = 0.20.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

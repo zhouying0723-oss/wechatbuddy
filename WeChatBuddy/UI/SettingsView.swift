@@ -2,12 +2,14 @@ import AppKit
 import SwiftUI
 
 struct SettingsView: View {
+    @ObservedObject private var appState: AppState
     @StateObject private var apiKeyModel: APIKeySettingsModel
     @StateObject private var providerModel: ModelProviderSettingsModel
     @StateObject private var connectionTestModel: ModelConnectionTestModel
     @StateObject private var rewritePreferencesModel: RewritePreferencesModel
 
     init(
+        appState: AppState,
         apiKeyStore: any APIKeyStoring = KeychainAPIKeyStore(),
         providerStore: any ModelProviderSettingsStoring =
             UserDefaultsModelProviderSettingsStore(),
@@ -15,6 +17,7 @@ struct SettingsView: View {
             UserDefaultsRewritePreferencesStore(),
         connectionTester: (any ModelConnectionTesting)? = nil
     ) {
+        self.appState = appState
         _apiKeyModel = StateObject(
             wrappedValue: APIKeySettingsModel(store: apiKeyStore)
         )
@@ -132,20 +135,99 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                Button("保存改写偏好") {
-                    rewritePreferencesModel.save()
+                Text("自定义改写要求")
+                    .font(.headline)
+
+                TextEditor(text: $rewritePreferencesModel.customInstruction)
+                    .font(.body)
+                    .frame(minHeight: 90)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(.separator, lineWidth: 1)
+                    }
+
+                Text(
+                    "\(rewritePreferencesModel.customInstruction.count) / \(RewritePromptBuilder.maximumCustomInstructionLength) 字符。固定安全规则不可修改。"
+                )
+                .font(.caption)
+                .foregroundStyle(
+                    rewritePreferencesModel.customInstruction.count
+                        > RewritePromptBuilder.maximumCustomInstructionLength
+                        ? .red
+                        : .secondary
+                )
+
+                HStack {
+                    Button("保存改写偏好") {
+                        rewritePreferencesModel.save()
+                    }
+                    .disabled(
+                        rewritePreferencesModel.customInstruction.count
+                            > RewritePromptBuilder.maximumCustomInstructionLength
+                    )
+
+                    Button("恢复默认要求") {
+                        rewritePreferencesModel.restoreDefaultInstruction()
+                    }
                 }
+            }
+
+            Section("隐私与数据") {
+                Label(
+                    "仅在你主动触发时，将当前输入框草稿发送到已配置的模型服务。",
+                    systemImage: "text.bubble"
+                )
+                Label(
+                    "不读取聊天记录或联系人，不持久化保存草稿和改写结果。",
+                    systemImage: "externaldrive.badge.xmark"
+                )
+                Label(
+                    "API Key 只存于本机 Keychain；剪贴板使用后会恢复。",
+                    systemImage: "key.fill"
+                )
+                Label(
+                    "应用只写回草稿，消息始终由你确认后手动发送。",
+                    systemImage: "hand.raised.fill"
+                )
+
+                Text("模型供应商可能按其服务条款处理请求数据，请同时查看供应商的隐私政策。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+            }
+
+            Section("安全诊断") {
+                Text(diagnosticReport.text)
+                    .font(.caption.monospaced())
+                    .textSelection(.enabled)
+
+                Button("复制安全诊断信息") {
+                    copyToPasteboard(diagnosticReport.text)
+                }
+
+                Text("诊断摘要不会包含 API Key、模型地址、微信草稿或模型回复。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
         .padding(12)
-        .frame(width: 500, height: 680)
+        .frame(width: 520, height: 760)
         .onAppear {
             NSApplication.shared.activate(ignoringOtherApps: true)
             providerModel.refresh()
             apiKeyModel.refresh()
             rewritePreferencesModel.refresh()
+            appState.refreshAccessibilityStatus()
         }
+    }
+
+    private var diagnosticReport: DiagnosticReport {
+        DiagnosticReportFactory.make(
+            appState: appState,
+            apiKeyStatus: apiKeyModel.status,
+            providerStatus: providerModel.status
+        )
     }
 
     private var apiKeyStatusColor: Color {

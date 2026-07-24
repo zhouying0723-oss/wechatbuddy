@@ -3,6 +3,46 @@ import XCTest
 @testable import WeChatBuddy
 
 final class AppStatusTests: XCTestCase {
+    @MainActor
+    func testOnboardingCompletionPersists() {
+        let suiteName = "OnboardingStoreTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+        let store = OnboardingStore(defaults: defaults)
+
+        XCTAssertFalse(store.hasCompleted)
+        store.complete()
+        XCTAssertTrue(store.hasCompleted)
+    }
+
+    func testOnboardingUsesOfficialHTTPSLinks() {
+        XCTAssertEqual(OnboardingLink.modelActivation.scheme, "https")
+        XCTAssertEqual(OnboardingLink.apiKey.scheme, "https")
+        XCTAssertEqual(OnboardingLink.documentation.host, "www.volcengine.com")
+        XCTAssertEqual(OnboardingLink.apiKey.host, "console.volcengine.com")
+    }
+
+    func testDiagnosticReportOmitsSensitiveValuesAndErrorDetails() {
+        let report = DiagnosticReport(
+            appVersion: "0.16.0",
+            macOSVersion: "Version 26.0",
+            accessibilityAuthorized: true,
+            hotKeyAvailable: true,
+            apiKeyConfigured: true,
+            modelConfigured: true,
+            latestWorkflowState: "最近一次失败（详细内容已省略）"
+        ).text
+
+        XCTAssertTrue(report.contains("辅助功能权限：可用"))
+        XCTAssertTrue(report.contains("API Key：已配置"))
+        XCTAssertTrue(report.contains("最近一次失败（详细内容已省略）"))
+        XCTAssertFalse(report.contains("sk-secret"))
+        XCTAssertFalse(report.contains("微信草稿正文"))
+        XCTAssertFalse(report.contains("模型回复正文"))
+    }
+
     func testReadyStatusHasLocalizedTitle() {
         XCTAssertEqual(AppStatus.ready.title, "就绪")
     }
