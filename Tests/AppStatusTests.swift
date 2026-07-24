@@ -49,6 +49,30 @@ final class AppStatusTests: XCTestCase {
 
         XCTAssertEqual(state.weChatFrontmostStatus, .frontmost)
     }
+
+    func testFrontmostHistoryKeepsWeChatWhenMenuBarAppActivates() {
+        var history = FrontmostApplicationHistory(
+            ownBundleIdentifier: "com.wechatbuddy.app",
+            targetBundleIdentifier: "com.tencent.xinWeChat",
+            currentBundleIdentifier: "com.tencent.xinWeChat"
+        )
+
+        history.record(bundleIdentifier: "com.wechatbuddy.app")
+
+        XCTAssertTrue(history.isTargetMostRecentExternalApplication)
+    }
+
+    func testFrontmostHistoryChangesForAnotherExternalApplication() {
+        var history = FrontmostApplicationHistory(
+            ownBundleIdentifier: "com.wechatbuddy.app",
+            targetBundleIdentifier: "com.tencent.xinWeChat",
+            currentBundleIdentifier: "com.tencent.xinWeChat"
+        )
+
+        history.record(bundleIdentifier: "com.apple.dt.Xcode")
+
+        XCTAssertFalse(history.isTargetMostRecentExternalApplication)
+    }
 }
 
 private final class AccessibilityAuthorizerMock: AccessibilityAuthorizing, @unchecked Sendable {
