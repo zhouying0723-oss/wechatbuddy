@@ -16,6 +16,8 @@ struct MenuBarContent: View {
 
         Text("检测应用：\(appState.detectedFrontmostBundleIdentifier ?? "未知")")
 
+        Text(appState.draftReadStatus.title)
+
         if appState.accessibilityStatus == .notAuthorized {
             Button("请求辅助功能权限") {
                 appState.requestAccessibilityAccess()
@@ -24,6 +26,12 @@ struct MenuBarContent: View {
             Button("打开辅助功能设置…") {
                 appState.openAccessibilitySettings()
             }
+        }
+
+        Divider()
+
+        Button("读取微信输入框") {
+            appState.readWeChatDraft()
         }
 
         Divider()

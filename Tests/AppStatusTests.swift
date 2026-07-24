@@ -99,6 +99,37 @@ final class AppStatusTests: XCTestCase {
 
         XCTAssertEqual(bundleIdentifier, "com.tencent.xinWeChat")
     }
+
+    @MainActor
+    func testReadWeChatDraftShowsTextWhenRequirementsAreMet() {
+        let state = AppState(
+            accessibilityAuthorizer: AccessibilityAuthorizerMock(isTrusted: true),
+            weChatApplicationDetector: WeChatApplicationDetectorMock(isFrontmost: true),
+            weChatInputReader: WeChatInputReaderMock(result: .success("测试草稿"))
+        )
+
+        state.readWeChatDraft()
+
+        XCTAssertEqual(state.draftReadStatus, .success("测试草稿"))
+    }
+
+    @MainActor
+    func testReadWeChatDraftDoesNotReadWhenWeChatIsNotFrontmost() {
+        let reader = WeChatInputReaderMock(result: .success("不应读取"))
+        let state = AppState(
+            accessibilityAuthorizer: AccessibilityAuthorizerMock(isTrusted: true),
+            weChatApplicationDetector: WeChatApplicationDetectorMock(isFrontmost: false),
+            weChatInputReader: reader
+        )
+
+        state.readWeChatDraft()
+
+        XCTAssertEqual(
+            state.draftReadStatus,
+            .failure("请先将微信切换到前台并点击输入框")
+        )
+        XCTAssertEqual(reader.readCount, 0)
+    }
 }
 
 private final class AccessibilityAuthorizerMock: AccessibilityAuthorizing, @unchecked Sendable {
@@ -136,5 +167,20 @@ private final class WeChatApplicationDetectorMock: WeChatApplicationDetecting {
                 ? SystemWeChatApplicationDetector.bundleIdentifier
                 : "com.apple.dt.Xcode"
         )
+    }
+}
+
+@MainActor
+private final class WeChatInputReaderMock: WeChatInputReading {
+    let result: Result<String, Error>
+    private(set) var readCount = 0
+
+    init(result: Result<String, Error>) {
+        self.result = result
+    }
+
+    func readFocusedDraft() throws -> String {
+        readCount += 1
+        return try result.get()
     }
 }
