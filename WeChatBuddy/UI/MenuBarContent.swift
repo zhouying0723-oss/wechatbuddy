@@ -22,6 +22,8 @@ struct MenuBarContent: View {
 
         Text(appState.draftWriteStatus.title)
 
+        Text(appState.rewriteWorkflowStatus.title)
+
         if appState.accessibilityStatus == .notAuthorized {
             Button("请求辅助功能权限") {
                 appState.requestAccessibilityAccess()
@@ -47,6 +49,14 @@ struct MenuBarContent: View {
                 presentDraftWriteResult(appState.testWriteWeChatDraft())
             }
         }
+
+        Button("AI 改写当前草稿") {
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(350))
+                presentRewriteResult(await appState.rewriteWeChatDraft())
+            }
+        }
+        .disabled(appState.rewriteWorkflowStatus == .processing)
 
         Divider()
 
@@ -83,6 +93,19 @@ struct MenuBarContent: View {
         alert.messageText = "微信输入框写回结果"
         alert.informativeText = message
         alert.alertStyle = message.hasPrefix("写回成功") ? .informational : .warning
+        alert.addButton(withTitle: "确定")
+
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        alert.runModal()
+    }
+
+    private func presentRewriteResult(_ message: String) {
+        let alert = NSAlert()
+        alert.messageText = "微信草稿 AI 改写结果"
+        alert.informativeText = message
+        alert.alertStyle = message.hasPrefix("AI 改写：已写回")
+            ? .informational
+            : .warning
         alert.addButton(withTitle: "确定")
 
         NSApplication.shared.activate(ignoringOtherApps: true)

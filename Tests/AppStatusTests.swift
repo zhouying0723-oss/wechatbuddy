@@ -204,18 +204,23 @@ final class AppStatusTests: XCTestCase {
     }
 
     @MainActor
-    func testReadWeChatDraftShowsTextWhenRequirementsAreMet() {
+    func testRewriteShortcutStartsCoordinator() async {
         let hotKeyService = HotKeyServiceMock()
+        let coordinator = RewriteCoordinatorMock()
         let state = AppState(
             accessibilityAuthorizer: AccessibilityAuthorizerMock(isTrusted: true),
             weChatApplicationDetector: WeChatApplicationDetectorMock(isFrontmost: true),
-            weChatInputReader: WeChatInputReaderMock(result: .success("测试草稿")),
-            hotKeyService: hotKeyService
+            hotKeyService: hotKeyService,
+            rewriteCoordinator: coordinator
         )
 
         hotKeyService.trigger()
+        for _ in 0 ..< 10 where state.rewriteWorkflowStatus == .processing {
+            await Task.yield()
+        }
 
-        XCTAssertEqual(state.draftReadStatus, .success("测试草稿"))
+        XCTAssertEqual(state.rewriteWorkflowStatus, .success)
+        XCTAssertEqual(coordinator.rewriteCount, 1)
         XCTAssertEqual(hotKeyService.registrationCount, 1)
     }
 
@@ -335,5 +340,18 @@ private final class HotKeyServiceMock: HotKeyHandling {
 
     func trigger() {
         handler?()
+    }
+}
+
+@MainActor
+private final class RewriteCoordinatorMock: RewriteCoordinating {
+    private(set) var isProcessing = false
+    private(set) var rewriteCount = 0
+
+    func rewriteFocusedDraft() async throws -> RewriteResult {
+        isProcessing = true
+        rewriteCount += 1
+        isProcessing = false
+        return RewriteResult(text: "优化草稿")
     }
 }
