@@ -31,7 +31,10 @@ struct MenuBarContent: View {
         Divider()
 
         Button("读取微信输入框") {
-            presentDraftReadResult(appState.readWeChatDraft())
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(150))
+                presentDraftReadResult(appState.readWeChatDraft())
+            }
         }
 
         Divider()
