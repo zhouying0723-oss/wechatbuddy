@@ -1,0 +1,196 @@
+import Foundation
+
+struct ModelChatRequest: Equatable, Sendable {
+    let systemPrompt: String
+    let userText: String
+}
+
+struct ModelChatResult: Equatable, Sendable {
+    let text: String
+}
+
+protocol ModelAPIRequesting: Sendable {
+    func complete(_ request: ModelChatRequest) async throws -> ModelChatResult
+}
+
+protocol HTTPTransport: Sendable {
+    func data(for request: URLRequest) async throws -> (Data, HTTPURLResponse)
+}
+
+enum ModelAPIClientError: LocalizedError, Equatable {
+    case invalidEndpoint
+    case invalidAPIKey
+    case invalidHTTPResponse
+    case httpError(statusCode: Int, message: String)
+    case responseDecodingFailed
+    case emptyContent
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidEndpoint:
+            "模型服务地址无效"
+        case .invalidAPIKey:
+            "尚未配置有效的 API Key"
+        case .invalidHTTPResponse:
+            "模型服务返回了无效的网络响应"
+        case let .httpError(statusCode, message):
+            "模型服务请求失败（HTTP \(statusCode)）：\(message)"
+        case .responseDecodingFailed:
+            "无法解析模型服务响应"
+        case .emptyContent:
+            "模型服务没有返回文本内容"
+        }
+    }
+}
+
+struct URLSessionHTTPTransport: HTTPTransport {
+    let session: URLSession
+
+    init(session: URLSession = .shared) {
+        self.session = session
+    }
+
+    func data(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ModelAPIClientError.invalidHTTPResponse
+        }
+        return (data, httpResponse)
+    }
+}
+
+struct ModelAPIClient: ModelAPIRequesting {
+    private let configuration: ModelProviderConfiguration
+    private let apiKey: String
+    private let transport: any HTTPTransport
+    private let timeout: TimeInterval
+
+    init(
+        configuration: ModelProviderConfiguration,
+        apiKey: String,
+        transport: any HTTPTransport = URLSessionHTTPTransport(),
+        timeout: TimeInterval = 30
+    ) {
+        self.configuration = configuration
+        self.apiKey = apiKey
+        self.transport = transport
+        self.timeout = timeout
+    }
+
+    func complete(_ request: ModelChatRequest) async throws -> ModelChatResult {
+        let urlRequest = try makeURLRequest(for: request)
+        let (data, response) = try await transport.data(for: urlRequest)
+
+        guard (200 ... 299).contains(response.statusCode) else {
+            let apiError = try? JSONDecoder().decode(
+                APIErrorEnvelope.self,
+                from: data
+            )
+            throw ModelAPIClientError.httpError(
+                statusCode: response.statusCode,
+                message: redacted(apiError?.error.message ?? "未知错误")
+            )
+        }
+
+        guard
+            let envelope = try? JSONDecoder().decode(
+                ChatCompletionEnvelope.self,
+                from: data
+            )
+        else {
+            throw ModelAPIClientError.responseDecodingFailed
+        }
+
+        guard
+            let content = envelope.choices.first?.message.content
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+            !content.isEmpty
+        else {
+            throw ModelAPIClientError.emptyContent
+        }
+
+        return ModelChatResult(text: content)
+    }
+
+    private func makeURLRequest(
+        for chatRequest: ModelChatRequest
+    ) throws -> URLRequest {
+        let validatedKey = try? APIKeyValidator.validated(apiKey)
+        guard let validatedKey else {
+            throw ModelAPIClientError.invalidAPIKey
+        }
+
+        guard let endpoint = URL(
+            string: "\(configuration.baseURL)/chat/completions"
+        ) else {
+            throw ModelAPIClientError.invalidEndpoint
+        }
+
+        var request = URLRequest(
+            url: endpoint,
+            cachePolicy: .reloadIgnoringLocalCacheData,
+            timeoutInterval: timeout
+        )
+        request.httpMethod = "POST"
+        request.setValue(
+            "Bearer \(validatedKey)",
+            forHTTPHeaderField: "Authorization"
+        )
+        request.setValue(
+            "application/json",
+            forHTTPHeaderField: "Content-Type"
+        )
+        request.httpBody = try JSONEncoder().encode(
+            ChatCompletionRequestBody(
+                model: configuration.modelID,
+                messages: [
+                    .init(role: "system", content: chatRequest.systemPrompt),
+                    .init(role: "user", content: chatRequest.userText)
+                ],
+                stream: false
+            )
+        )
+        return request
+    }
+
+    private func redacted(_ message: String) -> String {
+        guard !apiKey.isEmpty else {
+            return message
+        }
+        return message.replacingOccurrences(
+            of: apiKey,
+            with: "[已隐藏]"
+        )
+    }
+}
+
+private struct ChatCompletionRequestBody: Encodable {
+    struct Message: Encodable {
+        let role: String
+        let content: String
+    }
+
+    let model: String
+    let messages: [Message]
+    let stream: Bool
+}
+
+private struct ChatCompletionEnvelope: Decodable {
+    struct Choice: Decodable {
+        struct Message: Decodable {
+            let content: String
+        }
+
+        let message: Message
+    }
+
+    let choices: [Choice]
+}
+
+private struct APIErrorEnvelope: Decodable {
+    struct APIError: Decodable {
+        let message: String
+    }
+
+    let error: APIError
+}

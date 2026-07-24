@@ -28,6 +28,8 @@
 		A10000000000000000000013 /* ModelProviderSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000016 /* ModelProviderSettingsStore.swift */; };
 		A10000000000000000000014 /* ModelProviderSettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000017 /* ModelProviderSettingsModel.swift */; };
 		A10000000000000000000015 /* ModelProviderSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000018 /* ModelProviderSettingsTests.swift */; };
+		A10000000000000000000016 /* ModelAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000019 /* ModelAPIClient.swift */; };
+		A10000000000000000000017 /* ModelAPIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001A /* ModelAPIClientTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +67,8 @@
 		A20000000000000000000016 /* ModelProviderSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelProviderSettingsStore.swift; sourceTree = "<group>"; };
 		A20000000000000000000017 /* ModelProviderSettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelProviderSettingsModel.swift; sourceTree = "<group>"; };
 		A20000000000000000000018 /* ModelProviderSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelProviderSettingsTests.swift; sourceTree = "<group>"; };
+		A20000000000000000000019 /* ModelAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelAPIClient.swift; sourceTree = "<group>"; };
+		A2000000000000000000001A /* ModelAPIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelAPIClientTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +148,7 @@
 				A20000000000000000000007 /* AppStatusTests.swift */,
 				A20000000000000000000014 /* APIKeySettingsTests.swift */,
 				A20000000000000000000018 /* ModelProviderSettingsTests.swift */,
+				A2000000000000000000001A /* ModelAPIClientTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -176,6 +181,7 @@
 				A20000000000000000000012 /* KeychainAPIKeyStore.swift */,
 				A20000000000000000000015 /* ModelProviderConfiguration.swift */,
 				A20000000000000000000016 /* ModelProviderSettingsStore.swift */,
+				A20000000000000000000019 /* ModelAPIClient.swift */,
 			);
 			path = AI;
 			sourceTree = "<group>";
@@ -294,6 +300,7 @@
 				A1000000000000000000000F /* KeychainAPIKeyStore.swift in Sources */,
 				A10000000000000000000012 /* ModelProviderConfiguration.swift in Sources */,
 				A10000000000000000000013 /* ModelProviderSettingsStore.swift in Sources */,
+				A10000000000000000000016 /* ModelAPIClient.swift in Sources */,
 				A10000000000000000000003 /* MenuBarContent.swift in Sources */,
 				A10000000000000000000004 /* SettingsView.swift in Sources */,
 				A10000000000000000000010 /* APIKeySettingsModel.swift in Sources */,
@@ -308,6 +315,7 @@
 				A10000000000000000000005 /* AppStatusTests.swift in Sources */,
 				A10000000000000000000011 /* APIKeySettingsTests.swift in Sources */,
 				A10000000000000000000015 /* ModelProviderSettingsTests.swift in Sources */,
+				A10000000000000000000017 /* ModelAPIClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,7 +367,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.9.0;
+				MARKETING_VERSION = 0.10.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -380,7 +388,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.9.0;
+				MARKETING_VERSION = 0.10.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
