@@ -49,6 +49,9 @@ struct SystemWeChatInputReader: WeChatInputReading {
             throw WeChatInputReaderError.weChatNotRunning
         }
 
+        _ = mainApplication.activate(options: [.activateIgnoringOtherApps])
+        RunLoop.current.run(until: Date().addingTimeInterval(0.15))
+
         let processes = WeChatProcessDiscovery().processes(
             mainApplication: mainApplication
         )
@@ -61,6 +64,11 @@ struct SystemWeChatInputReader: WeChatInputReading {
             _ = AXUIElementSetAttributeValue(
                 applicationElement,
                 "AXEnhancedUserInterface" as CFString,
+                kCFBooleanTrue
+            )
+            _ = AXUIElementSetAttributeValue(
+                applicationElement,
+                "AXManualAccessibility" as CFString,
                 kCFBooleanTrue
             )
 
