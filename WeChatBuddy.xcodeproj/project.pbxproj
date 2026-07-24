@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 71;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,6 +16,11 @@
 		A10000000000000000000007 /* AccessibilityProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* AccessibilityProviding.swift */; };
 		A10000000000000000000008 /* TextRewriting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000B /* TextRewriting.swift */; };
 		A10000000000000000000009 /* HotKeyHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000C /* HotKeyHandling.swift */; };
+		A1000000000000000000000A /* SystemAccessibilityAuthorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* SystemAccessibilityAuthorizer.swift */; };
+		A1000000000000000000000B /* WeChatApplicationDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000E /* WeChatApplicationDetector.swift */; };
+		A1000000000000000000000C /* WeChatInputReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000F /* WeChatInputReader.swift */; };
+		A1000000000000000000000D /* ClipboardDraftReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010 /* ClipboardDraftReader.swift */; };
+		A1000000000000000000000E /* WeChatInputWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* WeChatInputWriter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +46,11 @@
 		A2000000000000000000000A /* AccessibilityProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityProviding.swift; sourceTree = "<group>"; };
 		A2000000000000000000000B /* TextRewriting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRewriting.swift; sourceTree = "<group>"; };
 		A2000000000000000000000C /* HotKeyHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyHandling.swift; sourceTree = "<group>"; };
+		A2000000000000000000000D /* SystemAccessibilityAuthorizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemAccessibilityAuthorizer.swift; sourceTree = "<group>"; };
+		A2000000000000000000000E /* WeChatApplicationDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeChatApplicationDetector.swift; sourceTree = "<group>"; };
+		A2000000000000000000000F /* WeChatInputReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeChatInputReader.swift; sourceTree = "<group>"; };
+		A20000000000000000000010 /* ClipboardDraftReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardDraftReader.swift; sourceTree = "<group>"; };
+		A20000000000000000000011 /* WeChatInputWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeChatInputWriter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,6 +142,11 @@
 			isa = PBXGroup;
 			children = (
 				A2000000000000000000000A /* AccessibilityProviding.swift */,
+				A2000000000000000000000D /* SystemAccessibilityAuthorizer.swift */,
+				A2000000000000000000000E /* WeChatApplicationDetector.swift */,
+				A2000000000000000000000F /* WeChatInputReader.swift */,
+				A20000000000000000000010 /* ClipboardDraftReader.swift */,
+				A20000000000000000000011 /* WeChatInputWriter.swift */,
 			);
 			path = Accessibility;
 			sourceTree = "<group>";
@@ -213,7 +228,6 @@
 			);
 			mainGroup = A40000000000000000000001;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = A40000000000000000000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -250,6 +264,11 @@
 				A10000000000000000000002 /* AppState.swift in Sources */,
 				A10000000000000000000009 /* HotKeyHandling.swift in Sources */,
 				A10000000000000000000007 /* AccessibilityProviding.swift in Sources */,
+				A1000000000000000000000A /* SystemAccessibilityAuthorizer.swift in Sources */,
+				A1000000000000000000000B /* WeChatApplicationDetector.swift in Sources */,
+				A1000000000000000000000C /* WeChatInputReader.swift in Sources */,
+				A1000000000000000000000D /* ClipboardDraftReader.swift in Sources */,
+				A1000000000000000000000E /* WeChatInputWriter.swift in Sources */,
 				A10000000000000000000008 /* TextRewriting.swift in Sources */,
 				A10000000000000000000003 /* MenuBarContent.swift in Sources */,
 				A10000000000000000000004 /* SettingsView.swift in Sources */,
@@ -304,6 +323,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 886PV5476M;
 				ENABLE_TESTABILITY = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = WeChatBuddy/Info.plist;
@@ -311,7 +331,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.3;
+				MARKETING_VERSION = 0.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -325,13 +345,14 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 886PV5476M;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = WeChatBuddy/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.3;
+				MARKETING_VERSION = 0.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

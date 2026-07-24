@@ -4,14 +4,17 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 
 ## 项目状态
 
-当前版本：`v0.2.3`
+当前版本：`v0.7.1`
 
-当前阶段：阶段 1，macOS 菜单栏应用骨架。
+当前阶段：阶段 2 已完成，等待合并 `feature/accessibility`。
 
 ## 核心原则
 
 - 使用 Swift 与 SwiftUI 开发 macOS 菜单栏应用。
 - 使用 macOS Accessibility API 读取和修改微信输入框。
+- 对不暴露 AX 文本控件的微信版本，使用受控键盘复制并完整恢复剪贴板。
+- 安全写回时只替换输入框草稿，不模拟发送操作。
+- 通过系统级 `Command + Shift + R` 快捷键触发草稿读取。
 - 应用只改写草稿，不自动发送消息。
 - OpenAI API Key 不写入代码或 Git，后续使用 macOS Keychain 保存。
 - 所有开发在 `feature/*` 分支完成，经确认后再合并到 `main`。
@@ -46,6 +49,7 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 - [CHANGELOG.md](CHANGELOG.md)：版本变更记录
 - [docs/architecture.md](docs/architecture.md)：详细模块边界与数据流
 - [docs/development.md](docs/development.md)：分支、提交、版本与验证规范
+- [AGENTS.md](AGENTS.md)：仓库级开发与自动化代理约束
 
 ## 分支与提交规范
 
