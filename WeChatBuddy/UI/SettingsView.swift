@@ -136,10 +136,34 @@ struct SettingsView: View {
                     rewritePreferencesModel.save()
                 }
             }
+
+            Section("隐私与数据") {
+                Label(
+                    "仅在你主动触发时，将当前输入框草稿发送到已配置的模型服务。",
+                    systemImage: "text.bubble"
+                )
+                Label(
+                    "不读取聊天记录或联系人，不持久化保存草稿和改写结果。",
+                    systemImage: "externaldrive.badge.xmark"
+                )
+                Label(
+                    "API Key 只存于本机 Keychain；剪贴板使用后会恢复。",
+                    systemImage: "key.fill"
+                )
+                Label(
+                    "应用只写回草稿，消息始终由你确认后手动发送。",
+                    systemImage: "hand.raised.fill"
+                )
+
+                Text("模型供应商可能按其服务条款处理请求数据，请同时查看供应商的隐私政策。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+            }
         }
         .formStyle(.grouped)
         .padding(12)
-        .frame(width: 500, height: 680)
+        .frame(width: 520, height: 760)
         .onAppear {
             NSApplication.shared.activate(ignoringOtherApps: true)
             providerModel.refresh()
