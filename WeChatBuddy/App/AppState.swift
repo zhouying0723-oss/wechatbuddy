@@ -44,6 +44,7 @@ final class AppState: ObservableObject {
     @Published private(set) var status: AppStatus = .ready
     @Published private(set) var accessibilityStatus: AccessibilityAuthorizationStatus
     @Published private(set) var weChatFrontmostStatus: WeChatFrontmostStatus
+    @Published private(set) var detectedFrontmostBundleIdentifier: String?
 
     private let accessibilityAuthorizer: any AccessibilityAuthorizing
     private let weChatApplicationDetector: any WeChatApplicationDetecting
@@ -57,9 +58,9 @@ final class AppState: ObservableObject {
         accessibilityStatus = accessibilityAuthorizer.isTrusted()
             ? .authorized
             : .notAuthorized
-        weChatFrontmostStatus = weChatApplicationDetector.isWeChatFrontmost()
-            ? .frontmost
-            : .notFrontmost
+        let detection = weChatApplicationDetector.detect()
+        weChatFrontmostStatus = detection.isFrontmost ? .frontmost : .notFrontmost
+        detectedFrontmostBundleIdentifier = detection.detectedBundleIdentifier
     }
 
     func refreshAccessibilityStatus() {
@@ -78,8 +79,8 @@ final class AppState: ObservableObject {
     }
 
     func refreshWeChatFrontmostStatus() {
-        weChatFrontmostStatus = weChatApplicationDetector.isWeChatFrontmost()
-            ? .frontmost
-            : .notFrontmost
+        let detection = weChatApplicationDetector.detect()
+        weChatFrontmostStatus = detection.isFrontmost ? .frontmost : .notFrontmost
+        detectedFrontmostBundleIdentifier = detection.detectedBundleIdentifier
     }
 }

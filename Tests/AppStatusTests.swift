@@ -73,6 +73,32 @@ final class AppStatusTests: XCTestCase {
 
         XCTAssertFalse(history.isTargetMostRecentExternalApplication)
     }
+
+    func testWindowOrderFindsWeChatBehindMenuBarApplication() {
+        let bundleIdentifier = FrontmostExternalApplicationResolver.resolve(
+            ownBundleIdentifier: "com.wechatbuddy.app",
+            windowOwnerBundleIdentifiers: [
+                "com.wechatbuddy.app",
+                "com.tencent.xinWeChat",
+                "com.apple.dt.Xcode"
+            ],
+            workspaceFrontmostBundleIdentifier: "com.wechatbuddy.app",
+            fallbackBundleIdentifier: "com.apple.dt.Xcode"
+        )
+
+        XCTAssertEqual(bundleIdentifier, "com.tencent.xinWeChat")
+    }
+
+    func testResolverFallsBackToActivationHistoryWithoutWindowInformation() {
+        let bundleIdentifier = FrontmostExternalApplicationResolver.resolve(
+            ownBundleIdentifier: "com.wechatbuddy.app",
+            windowOwnerBundleIdentifiers: [],
+            workspaceFrontmostBundleIdentifier: "com.wechatbuddy.app",
+            fallbackBundleIdentifier: "com.tencent.xinWeChat"
+        )
+
+        XCTAssertEqual(bundleIdentifier, "com.tencent.xinWeChat")
+    }
 }
 
 private final class AccessibilityAuthorizerMock: AccessibilityAuthorizing, @unchecked Sendable {
@@ -103,7 +129,12 @@ private final class WeChatApplicationDetectorMock: WeChatApplicationDetecting {
         self.isFrontmost = isFrontmost
     }
 
-    func isWeChatFrontmost() -> Bool {
-        isFrontmost
+    func detect() -> WeChatApplicationDetection {
+        WeChatApplicationDetection(
+            isFrontmost: isFrontmost,
+            detectedBundleIdentifier: isFrontmost
+                ? SystemWeChatApplicationDetector.bundleIdentifier
+                : "com.apple.dt.Xcode"
+        )
     }
 }

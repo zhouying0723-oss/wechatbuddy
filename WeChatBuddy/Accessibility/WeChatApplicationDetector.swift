@@ -1,9 +1,15 @@
 import AppKit
+import CoreGraphics
 import Foundation
+
+struct WeChatApplicationDetection: Equatable {
+    let isFrontmost: Bool
+    let detectedBundleIdentifier: String?
+}
 
 @MainActor
 protocol WeChatApplicationDetecting {
-    func isWeChatFrontmost() -> Bool
+    func detect() -> WeChatApplicationDetection
 }
 
 @MainActor
@@ -32,11 +38,20 @@ final class SystemWeChatApplicationDetector: NSObject, WeChatApplicationDetectin
         )
     }
 
-    func isWeChatFrontmost() -> Bool {
-        history.record(
-            bundleIdentifier: workspace.frontmostApplication?.bundleIdentifier
+    func detect() -> WeChatApplicationDetection {
+        let windowOwnerBundleIdentifiers = frontmostWindowOwnerBundleIdentifiers()
+        let detectedBundleIdentifier = FrontmostExternalApplicationResolver.resolve(
+            ownBundleIdentifier: Bundle.main.bundleIdentifier,
+            windowOwnerBundleIdentifiers: windowOwnerBundleIdentifiers,
+            workspaceFrontmostBundleIdentifier: workspace.frontmostApplication?.bundleIdentifier,
+            fallbackBundleIdentifier: history.mostRecentExternalBundleIdentifier
         )
-        return history.isTargetMostRecentExternalApplication
+        history.record(bundleIdentifier: detectedBundleIdentifier)
+
+        return WeChatApplicationDetection(
+            isFrontmost: detectedBundleIdentifier == Self.bundleIdentifier,
+            detectedBundleIdentifier: detectedBundleIdentifier
+        )
     }
 
     @objc
@@ -44,6 +59,48 @@ final class SystemWeChatApplicationDetector: NSObject, WeChatApplicationDetectin
         let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey]
             as? NSRunningApplication
         history.record(bundleIdentifier: application?.bundleIdentifier)
+    }
+
+    private func frontmostWindowOwnerBundleIdentifiers() -> [String] {
+        guard let windowInfo = CGWindowListCopyWindowInfo(
+            [.optionOnScreenOnly, .excludeDesktopElements],
+            CGWindowID(0)
+        ) as? [[String: Any]] else {
+            return []
+        }
+
+        return windowInfo.compactMap { window in
+            guard
+                (window[kCGWindowLayer as String] as? Int) == 0,
+                let processIdentifier = window[kCGWindowOwnerPID as String] as? Int32
+            else {
+                return nil
+            }
+
+            return NSRunningApplication(processIdentifier: processIdentifier)?
+                .bundleIdentifier
+        }
+    }
+}
+
+struct FrontmostExternalApplicationResolver {
+    static func resolve(
+        ownBundleIdentifier: String?,
+        windowOwnerBundleIdentifiers: [String],
+        workspaceFrontmostBundleIdentifier: String?,
+        fallbackBundleIdentifier: String?
+    ) -> String? {
+        if let windowOwner = windowOwnerBundleIdentifiers.first(where: {
+            $0 != ownBundleIdentifier
+        }) {
+            return windowOwner
+        }
+
+        if workspaceFrontmostBundleIdentifier != ownBundleIdentifier {
+            return workspaceFrontmostBundleIdentifier ?? fallbackBundleIdentifier
+        }
+
+        return fallbackBundleIdentifier
     }
 }
 

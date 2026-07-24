@@ -14,6 +14,8 @@ struct MenuBarContent: View {
 
         Text("微信前台：\(appState.weChatFrontmostStatus.title)")
 
+        Text("检测应用：\(appState.detectedFrontmostBundleIdentifier ?? "未知")")
+
         if appState.accessibilityStatus == .notAuthorized {
             Button("请求辅助功能权限") {
                 appState.requestAccessibilityAccess()
