@@ -42,49 +42,72 @@ struct SystemWeChatInputReader: WeChatInputReading {
             throw WeChatInputReaderError.accessibilityNotAuthorized
         }
 
-        guard let application = NSRunningApplication.runningApplications(
-            withBundleIdentifier: SystemWeChatApplicationDetector.bundleIdentifier
-        ).first(where: { !$0.isTerminated }) else {
+        let applications = NSWorkspace.shared.runningApplications
+            .filter(isWeChatApplication)
+            .sorted { lhs, rhs in
+                applicationPriority(lhs) < applicationPriority(rhs)
+            }
+
+        guard !applications.isEmpty else {
             throw WeChatInputReaderError.weChatNotRunning
         }
 
-        let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
-        _ = AXUIElementSetAttributeValue(
-            applicationElement,
-            "AXEnhancedUserInterface" as CFString,
-            kCFBooleanTrue
-        )
-        let focusedElementResult = elementAttribute(
-            kAXFocusedUIElementAttribute,
-            from: applicationElement
-        )
-        let element: AXUIElement
+        var diagnostics: [String] = []
 
-        if
-            focusedElementResult.error == .success,
-            let focusedElement = focusedElementResult.element,
-            isEditable(focusedElement)
-        {
-            element = focusedElement
-        } else {
+        for application in applications {
+            let applicationElement = AXUIElementCreateApplication(
+                application.processIdentifier
+            )
+            _ = AXUIElementSetAttributeValue(
+                applicationElement,
+                "AXEnhancedUserInterface" as CFString,
+                kCFBooleanTrue
+            )
+
+            let focusedElementResult = elementAttribute(
+                kAXFocusedUIElementAttribute,
+                from: applicationElement
+            )
+
+            if
+                focusedElementResult.error == .success,
+                let focusedElement = focusedElementResult.element,
+                isEditable(focusedElement)
+            {
+                return try draft(from: focusedElement)
+            }
+
             let searchResult = editableElementInFocusedWindow(of: applicationElement)
             if let editableElement = searchResult.element {
-            element = editableElement
-            } else if focusedElementResult.error == .success {
-                let role = focusedElementResult.element
-                    .flatMap { stringAttribute(kAXRoleAttribute, from: $0) } ?? "未知"
-                throw WeChatInputReaderError.unsupportedRole(role)
-            } else if focusedElementResult.error == .noValue {
-                throw WeChatInputReaderError.editableElementUnavailable(
-                    searchResult.diagnostic
-                )
-            } else {
-                throw WeChatInputReaderError.focusedElementUnavailable(
-                    focusedElementResult.error
-                )
+                return try draft(from: editableElement)
             }
+
+            let identifier = application.bundleIdentifier ?? "PID \(application.processIdentifier)"
+            diagnostics.append("\(identifier)：\(searchResult.diagnostic)")
         }
 
+        throw WeChatInputReaderError.editableElementUnavailable(
+            diagnostics.joined(separator: "；")
+        )
+    }
+
+    private func isWeChatApplication(_ application: NSRunningApplication) -> Bool {
+        guard !application.isTerminated else {
+            return false
+        }
+
+        let bundleIdentifier = application.bundleIdentifier ?? ""
+        return bundleIdentifier == SystemWeChatApplicationDetector.bundleIdentifier
+            || bundleIdentifier.hasPrefix("com.tencent.flue.WeChatAppEx")
+    }
+
+    private func applicationPriority(_ application: NSRunningApplication) -> Int {
+        application.bundleIdentifier == SystemWeChatApplicationDetector.bundleIdentifier
+            ? 0
+            : 1
+    }
+
+    private func draft(from element: AXUIElement) throws -> String {
         guard let draft = stringAttribute(kAXValueAttribute, from: element) else {
             throw WeChatInputReaderError.valueNotReadable
         }
@@ -111,9 +134,7 @@ struct SystemWeChatInputReader: WeChatInputReading {
         ).element
 
         let root = focusedWindow ?? firstWindow(of: applicationElement)
-        guard let root else {
-            return (nil, "未获取到微信窗口")
-        }
+            ?? applicationElement
 
         var queue = [root]
         var visitedElements = Set<CFHashCode>()
