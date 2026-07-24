@@ -1,12 +1,12 @@
 # WeChatBuddy
 
-WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微信输入框中输入草稿后，通过全局快捷键 `Command + Shift + R` 触发文本优化；应用读取当前输入框内容，调用 OpenAI API 完成纠错、润色和语气优化，再将结果写回输入框，由用户确认并手动发送。
+WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微信输入框中输入草稿后，通过全局快捷键 `Command + Shift + R` 触发文本优化；应用读取当前输入框内容，调用火山方舟等 OpenAI 协议兼容模型服务完成纠错、润色和语气优化，再将结果写回输入框，由用户确认并手动发送。
 
 ## 项目状态
 
-当前版本：`v0.7.1`
+当前版本：`v0.14.1`
 
-当前阶段：阶段 2 已完成，等待合并 `feature/accessibility`。
+当前阶段：阶段 5，体验与发布准备。
 
 ## 核心原则
 
@@ -16,7 +16,12 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 - 安全写回时只替换输入框草稿，不模拟发送操作。
 - 通过系统级 `Command + Shift + R` 快捷键触发草稿读取。
 - 应用只改写草稿，不自动发送消息。
-- OpenAI API Key 不写入代码或 Git，后续使用 macOS Keychain 保存。
+- 模型服务 API Key 仅保存在 macOS Keychain，不写入代码、日志或 Git。
+- 火山方舟为默认供应商，Base URL 与模型 ID 可在设置页配置。
+- 默认改写语气可选择自然、友好、专业或简洁，并保存在本机偏好中。
+- 模型请求支持取消，并对超时、断网和服务限流提供明确提示。
+- `Command + Shift + R` 已串联草稿读取、AI 改写、二次校验和安全写回。
+- 短文本改写默认关闭深度思考，并使用 15 秒超时避免长时间等待。
 - 所有开发在 `feature/*` 分支完成，经确认后再合并到 `main`。
 - 每个独立功能小步提交，并同步维护 `PROJECT.md` 与 `CHANGELOG.md`。
 
@@ -38,7 +43,7 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 - SwiftUI
 - AppKit（菜单栏及必要的 macOS 生命周期集成）
 - ApplicationServices / Accessibility API
-- URLSession（OpenAI API）
+- URLSession（火山方舟及 OpenAI 协议兼容 API）
 - Security / Keychain Services（密钥存储）
 - XCTest
 - Xcode 与 Git

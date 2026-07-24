@@ -96,6 +96,26 @@ enum DraftWriteStatus: Equatable {
     }
 }
 
+enum RewriteWorkflowStatus: Equatable {
+    case idle
+    case processing
+    case success
+    case failure(String)
+
+    var title: String {
+        switch self {
+        case .idle:
+            "AI 改写：等待触发"
+        case .processing:
+            "AI 改写：处理中…"
+        case .success:
+            "AI 改写：已写回，请确认后手动发送"
+        case let .failure(message):
+            "AI 改写失败：\(message)"
+        }
+    }
+}
+
 @MainActor
 final class AppState: ObservableObject {
     @Published private(set) var status: AppStatus = .ready
@@ -105,25 +125,35 @@ final class AppState: ObservableObject {
     @Published private(set) var draftReadStatus: DraftReadStatus = .idle
     @Published private(set) var hotKeyStatus: HotKeyStatus = .registered
     @Published private(set) var draftWriteStatus: DraftWriteStatus = .idle
+    @Published private(set) var rewriteWorkflowStatus: RewriteWorkflowStatus =
+        .idle
 
     private let accessibilityAuthorizer: any AccessibilityAuthorizing
     private let weChatApplicationDetector: any WeChatApplicationDetecting
     private let weChatInputReader: any WeChatInputReading
     private let weChatInputWriter: any WeChatInputWriting
     private let hotKeyService: any HotKeyHandling
+    private let rewriteCoordinator: any RewriteCoordinating
 
     init(
         accessibilityAuthorizer: any AccessibilityAuthorizing = SystemAccessibilityAuthorizer(),
         weChatApplicationDetector: any WeChatApplicationDetecting = SystemWeChatApplicationDetector(),
         weChatInputReader: any WeChatInputReading = SystemWeChatInputReader(),
         weChatInputWriter: any WeChatInputWriting = SystemWeChatInputWriter(),
-        hotKeyService: any HotKeyHandling = SystemHotKeyService()
+        hotKeyService: any HotKeyHandling = SystemHotKeyService(),
+        rewriteCoordinator: (any RewriteCoordinating)? = nil
     ) {
         self.accessibilityAuthorizer = accessibilityAuthorizer
         self.weChatApplicationDetector = weChatApplicationDetector
         self.weChatInputReader = weChatInputReader
         self.weChatInputWriter = weChatInputWriter
         self.hotKeyService = hotKeyService
+        self.rewriteCoordinator = rewriteCoordinator ?? RewriteCoordinator(
+            inputReader: weChatInputReader,
+            inputWriter: weChatInputWriter,
+            textRewriter: ModelTextRewriter(),
+            preferencesStore: UserDefaultsRewritePreferencesStore()
+        )
         accessibilityStatus = accessibilityAuthorizer.isTrusted()
             ? .authorized
             : .notAuthorized
@@ -133,7 +163,7 @@ final class AppState: ObservableObject {
 
         do {
             try hotKeyService.registerRewriteShortcut { [weak self] in
-                _ = self?.readWeChatDraft()
+                self?.startRewrite()
             }
             hotKeyStatus = .registered
         } catch {
@@ -208,5 +238,37 @@ final class AppState: ObservableObject {
         }
 
         return draftWriteStatus.title
+    }
+
+    func startRewrite() {
+        guard rewriteWorkflowStatus != .processing else {
+            return
+        }
+        rewriteWorkflowStatus = .processing
+        Task {
+            await performRewrite()
+        }
+    }
+
+    @discardableResult
+    func rewriteWeChatDraft() async -> String {
+        guard rewriteWorkflowStatus != .processing else {
+            return RewriteCoordinatorError.alreadyProcessing.errorDescription!
+        }
+        rewriteWorkflowStatus = .processing
+        await performRewrite()
+        return rewriteWorkflowStatus.title
+    }
+
+    private func performRewrite() async {
+        do {
+            _ = try await rewriteCoordinator.rewriteFocusedDraft()
+            rewriteWorkflowStatus = .success
+        } catch {
+            rewriteWorkflowStatus = .failure(
+                (error as? LocalizedError)?.errorDescription
+                    ?? error.localizedDescription
+            )
+        }
     }
 }
