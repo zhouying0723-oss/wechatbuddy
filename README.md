@@ -4,7 +4,7 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 
 ## 项目状态
 
-当前版本：`v0.18.0`
+当前版本：`v0.19.0`
 
 当前阶段：阶段 5，体验与发布准备。
 
@@ -25,6 +25,7 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 - 短文本改写默认关闭深度思考，并使用 15 秒超时避免长时间等待。
 - 设置页可生成并复制不含敏感内容的安全诊断摘要。
 - 首次启动提供使用向导，也可从菜单栏“使用指南…”重新打开。
+- 提供共享 Xcode Scheme 和 Apple Silicon 本机 Release 归档脚本。
 - 所有开发在 `feature/*` 分支完成，经确认后再合并到 `main`。
 - 每个独立功能小步提交，并同步维护 `PROJECT.md` 与 `CHANGELOG.md`。
 
@@ -71,6 +72,7 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 - [docs/architecture.md](docs/architecture.md)：详细模块边界与数据流
 - [docs/development.md](docs/development.md)：分支、提交、版本与验证规范
 - [docs/privacy.md](docs/privacy.md)：数据发送、本机存储、剪贴板与日志边界
+- [docs/release.md](docs/release.md)：本机归档、正式签名、公证与发布检查清单
 - [AGENTS.md](AGENTS.md)：仓库级开发与自动化代理约束
 
 ## 分支与提交规范

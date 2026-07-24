@@ -2,6 +2,25 @@
 
 本项目的所有重要变更均记录在此文件中。
 
+## [0.19.0] - 2026-07-24
+
+### 新增
+
+- 新增仓库共享的 `WeChatBuddy` Xcode Scheme。
+- 新增 Apple Silicon 无签名 Release Archive 与本机验收 ZIP 构建脚本。
+- 新增 Developer ID 签名、Apple 公证、产物验证和发布检查清单文档。
+
+### 修改
+
+- README 新增发布文档入口。
+- 应用声明为 macOS 效率工具分类。
+- Git 忽略本机 Archive 和无签名验收 ZIP。
+- 实际归档验证确认产物为 arm64、版本与 Bundle ID 正确且 ZIP 完整。
+
+### 修复
+
+- 修复通用 macOS Archive destination 携带不受支持的架构参数导致归档失败的问题。
+
 ## [0.18.0] - 2026-07-24
 
 ### 新增
