@@ -39,6 +39,7 @@ build/release/WeChatBuddy-local-unsigned.zip
 
 - [ ] 当前提交位于待发布 tag，工作区干净。
 - [ ] `MARKETING_VERSION` 与 CHANGELOG 一致。
+- [ ] Finder、应用切换器和“应用程序”目录正确显示 WeChatBuddy 图标。
 - [ ] arm64 自动测试全部通过。
 - [ ] 首次使用向导和设置窗口布局正常。
 - [ ] 辅助功能授权在正式签名 App 上保持稳定。

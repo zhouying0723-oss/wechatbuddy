@@ -119,6 +119,7 @@
 - [x] 设置页与项目文档提供隐私说明
 - [x] 安全诊断摘要
 - [ ] 结构化本机日志
+- [x] 原创应用图标与完整 AppIcon 资源
 - [x] Apple Silicon 本机 Release 归档与发布清单
 - [ ] Developer ID 签名、Hardened Runtime 与 Apple 公证
 - [ ] 回归测试与发布检查清单
@@ -181,6 +182,8 @@
 - 设置页支持编辑、保存和恢复默认改写要求，并限制为 1000 个字符。
 - 固定安全规则、语气选项和用户自定义要求分层组合，自定义内容不能覆盖安全规则。
 - 完成自定义改写要求人工验收，确认保存、重新加载、真实改写生效和恢复默认均正常。
+- 新增原创 macOS 应用图标、设计源图和 16 至 1024 像素的完整 AppIcon 资源。
+- 配置 Asset Catalog 和应用图标元数据，构建产物可正确生成 `AppIcon.icns`。
 - 新增共享 Xcode Scheme 和可重复执行的 arm64 无签名 Release 归档脚本。
 - 新增正式发布文档与检查清单，明确 Developer ID、Hardened Runtime、公证和 stapling 流程。
 - 完成本机归档验证，确认版本、Bundle ID、应用分类、arm64 架构和 ZIP 完整性正确。
