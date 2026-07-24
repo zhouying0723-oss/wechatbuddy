@@ -10,6 +10,18 @@ struct MenuBarContent: View {
 
         Text("状态：\(appState.status.title)")
 
+        Text("辅助功能：\(appState.accessibilityStatus.title)")
+
+        if appState.accessibilityStatus == .notAuthorized {
+            Button("请求辅助功能权限") {
+                appState.requestAccessibilityAccess()
+            }
+
+            Button("打开辅助功能设置…") {
+                appState.openAccessibilitySettings()
+            }
+        }
+
         Divider()
 
         Button("打开设置…") {
@@ -23,5 +35,8 @@ struct MenuBarContent: View {
             NSApplication.shared.terminate(nil)
         }
         .keyboardShortcut("q")
+        .onAppear {
+            appState.refreshAccessibilityStatus()
+        }
     }
 }
