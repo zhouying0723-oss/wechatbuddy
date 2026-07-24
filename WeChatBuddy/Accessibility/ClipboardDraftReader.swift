@@ -87,7 +87,7 @@ struct ClipboardDraftReader {
     }
 }
 
-private struct PasteboardSnapshot {
+struct PasteboardSnapshot {
     struct Item {
         let values: [(type: NSPasteboard.PasteboardType, data: Data)]
     }

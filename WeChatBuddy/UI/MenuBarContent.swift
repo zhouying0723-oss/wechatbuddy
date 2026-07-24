@@ -20,6 +20,8 @@ struct MenuBarContent: View {
 
         Text(appState.draftReadStatus.title)
 
+        Text(appState.draftWriteStatus.title)
+
         if appState.accessibilityStatus == .notAuthorized {
             Button("请求辅助功能权限") {
                 appState.requestAccessibilityAccess()
@@ -36,6 +38,13 @@ struct MenuBarContent: View {
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(150))
                 presentDraftReadResult(appState.readWeChatDraft())
+            }
+        }
+
+        Button("测试写回微信输入框") {
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(150))
+                presentDraftWriteResult(appState.testWriteWeChatDraft())
             }
         }
 
@@ -63,6 +72,17 @@ struct MenuBarContent: View {
         alert.messageText = "微信输入框读取结果"
         alert.informativeText = message
         alert.alertStyle = message.hasPrefix("读取成功") ? .informational : .warning
+        alert.addButton(withTitle: "确定")
+
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        alert.runModal()
+    }
+
+    private func presentDraftWriteResult(_ message: String) {
+        let alert = NSAlert()
+        alert.messageText = "微信输入框写回结果"
+        alert.informativeText = message
+        alert.alertStyle = message.hasPrefix("写回成功") ? .informational : .warning
         alert.addButton(withTitle: "确定")
 
         NSApplication.shared.activate(ignoringOtherApps: true)

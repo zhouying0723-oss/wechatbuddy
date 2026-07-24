@@ -181,6 +181,14 @@ final class AppStatusTests: XCTestCase {
         }
     }
 
+    func testDraftWriteValidationRejectsEmptyReplacement() {
+        XCTAssertThrowsError(
+            try WeChatDraftWriteValidator.validate(" \n")
+        ) { error in
+            XCTAssertEqual(error as? WeChatInputWriterError, .emptyReplacement)
+        }
+    }
+
     @MainActor
     func testReadWeChatDraftShowsTextWhenRequirementsAreMet() {
         let hotKeyService = HotKeyServiceMock()
@@ -214,6 +222,24 @@ final class AppStatusTests: XCTestCase {
         )
         XCTAssertEqual(message, "读取失败：请先将微信切换到前台并点击输入框")
         XCTAssertEqual(reader.readCount, 0)
+    }
+
+    @MainActor
+    func testWriteTestDraftAddsVisiblePrefix() {
+        let writer = WeChatInputWriterMock()
+        let state = AppState(
+            accessibilityAuthorizer: AccessibilityAuthorizerMock(isTrusted: true),
+            weChatApplicationDetector: WeChatApplicationDetectorMock(isFrontmost: true),
+            weChatInputReader: WeChatInputReaderMock(result: .success("测试草稿")),
+            weChatInputWriter: writer,
+            hotKeyService: HotKeyServiceMock()
+        )
+
+        let message = state.testWriteWeChatDraft()
+
+        XCTAssertEqual(writer.writtenTexts, ["【写回测试】测试草稿"])
+        XCTAssertEqual(state.draftWriteStatus, .success)
+        XCTAssertEqual(message, "写回成功，请在微信中确认")
     }
 }
 
@@ -267,6 +293,15 @@ private final class WeChatInputReaderMock: WeChatInputReading {
     func readFocusedDraft() throws -> String {
         readCount += 1
         return try result.get()
+    }
+}
+
+@MainActor
+private final class WeChatInputWriterMock: WeChatInputWriting {
+    private(set) var writtenTexts: [String] = []
+
+    func writeFocusedDraft(_ text: String) throws {
+        writtenTexts.append(text)
     }
 }
 

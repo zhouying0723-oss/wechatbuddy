@@ -79,6 +79,23 @@ enum HotKeyStatus: Equatable {
     }
 }
 
+enum DraftWriteStatus: Equatable {
+    case idle
+    case success
+    case failure(String)
+
+    var title: String {
+        switch self {
+        case .idle:
+            "尚未测试写回"
+        case .success:
+            "写回成功，请在微信中确认"
+        case let .failure(message):
+            "写回失败：\(message)"
+        }
+    }
+}
+
 @MainActor
 final class AppState: ObservableObject {
     @Published private(set) var status: AppStatus = .ready
@@ -87,21 +104,25 @@ final class AppState: ObservableObject {
     @Published private(set) var detectedFrontmostBundleIdentifier: String?
     @Published private(set) var draftReadStatus: DraftReadStatus = .idle
     @Published private(set) var hotKeyStatus: HotKeyStatus = .registered
+    @Published private(set) var draftWriteStatus: DraftWriteStatus = .idle
 
     private let accessibilityAuthorizer: any AccessibilityAuthorizing
     private let weChatApplicationDetector: any WeChatApplicationDetecting
     private let weChatInputReader: any WeChatInputReading
+    private let weChatInputWriter: any WeChatInputWriting
     private let hotKeyService: any HotKeyHandling
 
     init(
         accessibilityAuthorizer: any AccessibilityAuthorizing = SystemAccessibilityAuthorizer(),
         weChatApplicationDetector: any WeChatApplicationDetecting = SystemWeChatApplicationDetector(),
         weChatInputReader: any WeChatInputReading = SystemWeChatInputReader(),
+        weChatInputWriter: any WeChatInputWriting = SystemWeChatInputWriter(),
         hotKeyService: any HotKeyHandling = SystemHotKeyService()
     ) {
         self.accessibilityAuthorizer = accessibilityAuthorizer
         self.weChatApplicationDetector = weChatApplicationDetector
         self.weChatInputReader = weChatInputReader
+        self.weChatInputWriter = weChatInputWriter
         self.hotKeyService = hotKeyService
         accessibilityStatus = accessibilityAuthorizer.isTrusted()
             ? .authorized
@@ -167,5 +188,25 @@ final class AppState: ObservableObject {
         }
 
         return draftReadStatus.title
+    }
+
+    @discardableResult
+    func testWriteWeChatDraft() -> String {
+        let readResult = readWeChatDraft()
+        guard case let .success(draft) = draftReadStatus else {
+            draftWriteStatus = .failure(readResult)
+            return draftWriteStatus.title
+        }
+
+        do {
+            try weChatInputWriter.writeFocusedDraft("【写回测试】\(draft)")
+            draftWriteStatus = .success
+        } catch {
+            draftWriteStatus = .failure(
+                (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            )
+        }
+
+        return draftWriteStatus.title
     }
 }
