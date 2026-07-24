@@ -1,9 +1,34 @@
+import Carbon
 import XCTest
 @testable import WeChatBuddy
 
 final class AppStatusTests: XCTestCase {
     func testReadyStatusHasLocalizedTitle() {
         XCTAssertEqual(AppStatus.ready.title, "就绪")
+    }
+
+    func testRewriteShortcutUsesCommandShiftR() {
+        XCTAssertEqual(RewriteHotKey.standard.keyCode, UInt32(kVK_ANSI_R))
+        XCTAssertEqual(RewriteHotKey.standard.modifiers, UInt32(cmdKey | shiftKey))
+    }
+
+    func testRewriteShortcutMatchesOnlyItsRegisteredIdentifier() {
+        XCTAssertTrue(
+            RewriteHotKey.standard.matches(
+                EventHotKeyID(
+                    signature: RewriteHotKey.signature,
+                    id: RewriteHotKey.identifier
+                )
+            )
+        )
+        XCTAssertFalse(
+            RewriteHotKey.standard.matches(
+                EventHotKeyID(
+                    signature: RewriteHotKey.signature,
+                    id: RewriteHotKey.identifier + 1
+                )
+            )
+        )
     }
 
     @MainActor
@@ -158,16 +183,18 @@ final class AppStatusTests: XCTestCase {
 
     @MainActor
     func testReadWeChatDraftShowsTextWhenRequirementsAreMet() {
+        let hotKeyService = HotKeyServiceMock()
         let state = AppState(
             accessibilityAuthorizer: AccessibilityAuthorizerMock(isTrusted: true),
             weChatApplicationDetector: WeChatApplicationDetectorMock(isFrontmost: true),
-            weChatInputReader: WeChatInputReaderMock(result: .success("测试草稿"))
+            weChatInputReader: WeChatInputReaderMock(result: .success("测试草稿")),
+            hotKeyService: hotKeyService
         )
 
-        let message = state.readWeChatDraft()
+        hotKeyService.trigger()
 
         XCTAssertEqual(state.draftReadStatus, .success("测试草稿"))
-        XCTAssertEqual(message, "读取成功：测试草稿")
+        XCTAssertEqual(hotKeyService.registrationCount, 1)
     }
 
     @MainActor
@@ -240,5 +267,24 @@ private final class WeChatInputReaderMock: WeChatInputReading {
     func readFocusedDraft() throws -> String {
         readCount += 1
         return try result.get()
+    }
+}
+
+@MainActor
+private final class HotKeyServiceMock: HotKeyHandling {
+    private(set) var registrationCount = 0
+    private var handler: (@MainActor () -> Void)?
+
+    func registerRewriteShortcut(handler: @escaping @MainActor () -> Void) throws {
+        registrationCount += 1
+        self.handler = handler
+    }
+
+    func unregisterRewriteShortcut() {
+        handler = nil
+    }
+
+    func trigger() {
+        handler?()
     }
 }

@@ -16,6 +16,8 @@ struct MenuBarContent: View {
 
         Text("检测应用：\(appState.detectedFrontmostBundleIdentifier ?? "未知")")
 
+        Text("快捷键：\(appState.hotKeyStatus.title)")
+
         Text(appState.draftReadStatus.title)
 
         if appState.accessibilityStatus == .notAuthorized {
