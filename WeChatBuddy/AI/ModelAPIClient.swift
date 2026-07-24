@@ -21,6 +21,11 @@ enum ModelAPIClientError: LocalizedError, Equatable {
     case invalidEndpoint
     case invalidAPIKey
     case invalidHTTPResponse
+    case cancelled
+    case timedOut
+    case networkUnavailable
+    case networkError(String)
+    case rateLimited(retryAfterSeconds: Int?, message: String)
     case httpError(statusCode: Int, message: String)
     case responseDecodingFailed
     case emptyContent
@@ -33,6 +38,20 @@ enum ModelAPIClientError: LocalizedError, Equatable {
             "尚未配置有效的 API Key"
         case .invalidHTTPResponse:
             "模型服务返回了无效的网络响应"
+        case .cancelled:
+            "模型请求已取消"
+        case .timedOut:
+            "模型请求超时，请稍后重试"
+        case .networkUnavailable:
+            "无法连接模型服务，请检查网络连接和 Base URL"
+        case let .networkError(message):
+            "模型服务网络请求失败：\(message)"
+        case let .rateLimited(retryAfterSeconds, message):
+            if let retryAfterSeconds {
+                "请求过于频繁，请在 \(retryAfterSeconds) 秒后重试：\(message)"
+            } else {
+                "请求过于频繁，请稍后重试：\(message)"
+            }
         case let .httpError(statusCode, message):
             "模型服务请求失败（HTTP \(statusCode)）：\(message)"
         case .responseDecodingFailed:
@@ -79,7 +98,31 @@ struct ModelAPIClient: ModelAPIRequesting {
 
     func complete(_ request: ModelChatRequest) async throws -> ModelChatResult {
         let urlRequest = try makeURLRequest(for: request)
-        let (data, response) = try await transport.data(for: urlRequest)
+        guard !Task.isCancelled else {
+            throw ModelAPIClientError.cancelled
+        }
+
+        let data: Data
+        let response: HTTPURLResponse
+        do {
+            (data, response) = try await transport.data(for: urlRequest)
+        } catch {
+            throw mappedTransportError(error)
+        }
+        guard !Task.isCancelled else {
+            throw ModelAPIClientError.cancelled
+        }
+
+        if response.statusCode == 429 {
+            let apiError = try? JSONDecoder().decode(
+                APIErrorEnvelope.self,
+                from: data
+            )
+            throw ModelAPIClientError.rateLimited(
+                retryAfterSeconds: retryAfterSeconds(from: response),
+                message: redacted(apiError?.error.message ?? "已达到服务限流")
+            )
+        }
 
         guard (200 ... 299).contains(response.statusCode) else {
             let apiError = try? JSONDecoder().decode(
@@ -161,6 +204,43 @@ struct ModelAPIClient: ModelAPIRequesting {
             of: apiKey,
             with: "[已隐藏]"
         )
+    }
+
+    private func mappedTransportError(_ error: Error) -> ModelAPIClientError {
+        if error is CancellationError {
+            return .cancelled
+        }
+        guard let urlError = error as? URLError else {
+            return .networkError(error.localizedDescription)
+        }
+
+        switch urlError.code {
+        case .cancelled:
+            return .cancelled
+        case .timedOut:
+            return .timedOut
+        case .notConnectedToInternet,
+             .networkConnectionLost,
+             .cannotFindHost,
+             .cannotConnectToHost,
+             .dnsLookupFailed:
+            return .networkUnavailable
+        default:
+            return .networkError(urlError.localizedDescription)
+        }
+    }
+
+    private func retryAfterSeconds(
+        from response: HTTPURLResponse
+    ) -> Int? {
+        guard
+            let value = response.value(forHTTPHeaderField: "Retry-After"),
+            let seconds = Int(value),
+            seconds >= 0
+        else {
+            return nil
+        }
+        return seconds
     }
 }
 

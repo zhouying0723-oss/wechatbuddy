@@ -79,6 +79,23 @@ final class ModelConnectionTesterTests: XCTestCase {
 
         XCTAssertNil(model.copyableErrorMessage)
     }
+
+    @MainActor
+    func testSettingsModelCanCancelRequest() async {
+        let model = ModelConnectionTestModel(
+            tester: ModelConnectionTestingMock(result: .waiting)
+        )
+        let operation = Task {
+            await model.testConnection()
+        }
+        await Task.yield()
+
+        model.cancel()
+        await operation.value
+
+        XCTAssertEqual(model.status, .cancelled)
+        XCTAssertFalse(model.isTesting)
+    }
 }
 
 private struct ConnectionAPIKeyStoreMock: APIKeyStoring {
@@ -128,6 +145,7 @@ private struct ModelConnectionTestingMock: ModelConnectionTesting {
     enum Result {
         case success
         case failure
+        case waiting
     }
 
     let result: Result
@@ -135,9 +153,12 @@ private struct ModelConnectionTestingMock: ModelConnectionTesting {
     func testConnection() async throws -> ModelChatResult {
         switch result {
         case .success:
-            ModelChatResult(text: "连接成功")
+            return ModelChatResult(text: "连接成功")
         case .failure:
             throw ModelConnectionTestError.missingAPIKey
+        case .waiting:
+            try await Task.sleep(for: .seconds(60))
+            return ModelChatResult(text: "不应返回")
         }
     }
 }

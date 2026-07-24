@@ -101,6 +101,12 @@ struct SettingsView: View {
                     }
                     .disabled(connectionTestModel.isTesting)
 
+                    if connectionTestModel.isTesting {
+                        Button("取消", role: .cancel) {
+                            connectionTestModel.cancel()
+                        }
+                    }
+
                     if let errorMessage =
                         connectionTestModel.copyableErrorMessage
                     {
@@ -170,7 +176,7 @@ struct SettingsView: View {
             .red
         case .success:
             .green
-        case .idle, .testing:
+        case .idle, .testing, .cancelled:
             .secondary
         }
     }

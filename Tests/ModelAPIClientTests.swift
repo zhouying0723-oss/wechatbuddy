@@ -116,6 +116,58 @@ final class ModelAPIClientTests: XCTestCase {
         }
     }
 
+    func testMapsTimeoutError() async {
+        let transport = HTTPTransportMock(error: URLError(.timedOut))
+
+        do {
+            _ = try await makeClient(transport: transport).complete(
+                ModelChatRequest(systemPrompt: "提示", userText: "草稿")
+            )
+            XCTFail("Expected timeout")
+        } catch {
+            XCTAssertEqual(error as? ModelAPIClientError, .timedOut)
+        }
+    }
+
+    func testMapsOfflineError() async {
+        let transport = HTTPTransportMock(
+            error: URLError(.notConnectedToInternet)
+        )
+
+        do {
+            _ = try await makeClient(transport: transport).complete(
+                ModelChatRequest(systemPrompt: "提示", userText: "草稿")
+            )
+            XCTFail("Expected network failure")
+        } catch {
+            XCTAssertEqual(error as? ModelAPIClientError, .networkUnavailable)
+        }
+    }
+
+    func testMapsRateLimitAndRetryAfterHeader() async {
+        let data = Data(#"{"error":{"message":"too many requests"}}"#.utf8)
+        let transport = HTTPTransportMock(
+            data: data,
+            statusCode: 429,
+            headers: ["Retry-After": "12"]
+        )
+
+        do {
+            _ = try await makeClient(transport: transport).complete(
+                ModelChatRequest(systemPrompt: "提示", userText: "草稿")
+            )
+            XCTFail("Expected rate limit")
+        } catch {
+            XCTAssertEqual(
+                error as? ModelAPIClientError,
+                .rateLimited(
+                    retryAfterSeconds: 12,
+                    message: "too many requests"
+                )
+            )
+        }
+    }
+
     private func makeClient(
         transport: any HTTPTransport
     ) -> ModelAPIClient {
@@ -142,23 +194,43 @@ final class ModelAPIClientTests: XCTestCase {
 }
 
 private actor HTTPTransportMock: HTTPTransport {
-    private let responseData: Data
+    private let responseData: Data?
     private let statusCode: Int
+    private let headers: [String: String]
+    private let error: Error?
     private(set) var lastRequest: URLRequest?
 
-    init(data: Data, statusCode: Int) {
+    init(
+        data: Data,
+        statusCode: Int,
+        headers: [String: String] = [
+            "Content-Type": "application/json"
+        ]
+    ) {
         responseData = data
         self.statusCode = statusCode
+        self.headers = headers
+        error = nil
+    }
+
+    init(error: Error) {
+        responseData = nil
+        statusCode = 0
+        headers = [:]
+        self.error = error
     }
 
     func data(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         lastRequest = request
+        if let error {
+            throw error
+        }
         let response = HTTPURLResponse(
             url: request.url!,
             statusCode: statusCode,
             httpVersion: "HTTP/1.1",
-            headerFields: ["Content-Type": "application/json"]
+            headerFields: headers
         )!
-        return (responseData, response)
+        return (responseData!, response)
     }
 }
