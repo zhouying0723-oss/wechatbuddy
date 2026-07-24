@@ -19,6 +19,7 @@
 		A1000000000000000000000A /* SystemAccessibilityAuthorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* SystemAccessibilityAuthorizer.swift */; };
 		A1000000000000000000000B /* WeChatApplicationDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000E /* WeChatApplicationDetector.swift */; };
 		A1000000000000000000000C /* WeChatInputReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000F /* WeChatInputReader.swift */; };
+		A1000000000000000000000D /* ClipboardDraftReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010 /* ClipboardDraftReader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		A2000000000000000000000D /* SystemAccessibilityAuthorizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemAccessibilityAuthorizer.swift; sourceTree = "<group>"; };
 		A2000000000000000000000E /* WeChatApplicationDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeChatApplicationDetector.swift; sourceTree = "<group>"; };
 		A2000000000000000000000F /* WeChatInputReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeChatInputReader.swift; sourceTree = "<group>"; };
+		A20000000000000000000010 /* ClipboardDraftReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardDraftReader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +143,7 @@
 				A2000000000000000000000D /* SystemAccessibilityAuthorizer.swift */,
 				A2000000000000000000000E /* WeChatApplicationDetector.swift */,
 				A2000000000000000000000F /* WeChatInputReader.swift */,
+				A20000000000000000000010 /* ClipboardDraftReader.swift */,
 			);
 			path = Accessibility;
 			sourceTree = "<group>";
@@ -261,6 +264,7 @@
 				A1000000000000000000000A /* SystemAccessibilityAuthorizer.swift in Sources */,
 				A1000000000000000000000B /* WeChatApplicationDetector.swift in Sources */,
 				A1000000000000000000000C /* WeChatInputReader.swift in Sources */,
+				A1000000000000000000000D /* ClipboardDraftReader.swift in Sources */,
 				A10000000000000000000008 /* TextRewriting.swift in Sources */,
 				A10000000000000000000003 /* MenuBarContent.swift in Sources */,
 				A10000000000000000000004 /* SettingsView.swift in Sources */,
@@ -323,7 +327,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.4.6;
+				MARKETING_VERSION = 0.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -344,7 +348,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.4.6;
+				MARKETING_VERSION = 0.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

@@ -124,6 +124,38 @@ final class AppStatusTests: XCTestCase {
         )
     }
 
+    func testClipboardDraftValidationReturnsCopiedText() throws {
+        XCTAssertEqual(
+            try ClipboardDraftValidator.validate(
+                copiedText: "测试草稿",
+                clipboardChanged: true
+            ),
+            "测试草稿"
+        )
+    }
+
+    func testClipboardDraftValidationRejectsUnchangedClipboard() {
+        XCTAssertThrowsError(
+            try ClipboardDraftValidator.validate(
+                copiedText: "旧剪贴板内容",
+                clipboardChanged: false
+            )
+        ) { error in
+            XCTAssertEqual(error as? ClipboardDraftReaderError, .clipboardUnchanged)
+        }
+    }
+
+    func testClipboardDraftValidationRejectsEmptyDraft() {
+        XCTAssertThrowsError(
+            try ClipboardDraftValidator.validate(
+                copiedText: " \n",
+                clipboardChanged: true
+            )
+        ) { error in
+            XCTAssertEqual(error as? ClipboardDraftReaderError, .emptyDraft)
+        }
+    }
+
     @MainActor
     func testReadWeChatDraftShowsTextWhenRequirementsAreMet() {
         let state = AppState(

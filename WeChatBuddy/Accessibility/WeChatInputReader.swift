@@ -93,9 +93,15 @@ struct SystemWeChatInputReader: WeChatInputReading {
             diagnostics.append("\(process.displayName)：\(searchResult.diagnostic)")
         }
 
-        throw WeChatInputReaderError.editableElementUnavailable(
-            diagnostics.joined(separator: "；")
-        )
+        do {
+            return try ClipboardDraftReader().readSelectedInput()
+        } catch {
+            let clipboardError = (error as? LocalizedError)?.errorDescription
+                ?? error.localizedDescription
+            throw WeChatInputReaderError.editableElementUnavailable(
+                "\(diagnostics.joined(separator: "；"))；剪贴板兼容读取：\(clipboardError)"
+            )
+        }
     }
 
     private func draft(from element: AXUIElement) throws -> String {
