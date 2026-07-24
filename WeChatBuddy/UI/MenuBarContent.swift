@@ -3,6 +3,7 @@ import SwiftUI
 
 struct MenuBarContent: View {
     @ObservedObject var appState: AppState
+    let showOnboarding: () -> Void
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
@@ -63,6 +64,10 @@ struct MenuBarContent: View {
         Button("打开设置…") {
             NSApplication.shared.activate(ignoringOtherApps: true)
             openSettings()
+        }
+
+        Button("使用指南…") {
+            showOnboarding()
         }
 
         Divider()

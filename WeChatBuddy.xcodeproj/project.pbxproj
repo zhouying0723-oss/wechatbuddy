@@ -40,6 +40,7 @@
 		A1000000000000000000001F /* RewriteCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000022 /* RewriteCoordinator.swift */; };
 		A10000000000000000000020 /* RewriteCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000023 /* RewriteCoordinatorTests.swift */; };
 		A10000000000000000000021 /* DiagnosticReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000024 /* DiagnosticReport.swift */; };
+		A10000000000000000000022 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000025 /* OnboardingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,6 +90,7 @@
 		A20000000000000000000022 /* RewriteCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewriteCoordinator.swift; sourceTree = "<group>"; };
 		A20000000000000000000023 /* RewriteCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewriteCoordinatorTests.swift; sourceTree = "<group>"; };
 		A20000000000000000000024 /* DiagnosticReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticReport.swift; sourceTree = "<group>"; };
+		A20000000000000000000025 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,6 +164,7 @@
 				A20000000000000000000017 /* ModelProviderSettingsModel.swift */,
 				A2000000000000000000001C /* ModelConnectionTestModel.swift */,
 				A2000000000000000000001F /* RewritePreferencesModel.swift */,
+				A20000000000000000000025 /* OnboardingView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -346,6 +349,7 @@
 				A1000000000000000000001E /* ModelTextRewriter.swift in Sources */,
 				A1000000000000000000001F /* RewriteCoordinator.swift in Sources */,
 				A10000000000000000000021 /* DiagnosticReport.swift in Sources */,
+				A10000000000000000000022 /* OnboardingView.swift in Sources */,
 				A10000000000000000000003 /* MenuBarContent.swift in Sources */,
 				A10000000000000000000004 /* SettingsView.swift in Sources */,
 				A10000000000000000000010 /* APIKeySettingsModel.swift in Sources */,
@@ -415,7 +419,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.16.0;
+				MARKETING_VERSION = 0.17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -436,7 +440,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.16.0;
+				MARKETING_VERSION = 0.17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

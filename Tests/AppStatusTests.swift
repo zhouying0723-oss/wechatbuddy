@@ -3,6 +3,27 @@ import XCTest
 @testable import WeChatBuddy
 
 final class AppStatusTests: XCTestCase {
+    @MainActor
+    func testOnboardingCompletionPersists() {
+        let suiteName = "OnboardingStoreTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+        let store = OnboardingStore(defaults: defaults)
+
+        XCTAssertFalse(store.hasCompleted)
+        store.complete()
+        XCTAssertTrue(store.hasCompleted)
+    }
+
+    func testOnboardingUsesOfficialHTTPSLinks() {
+        XCTAssertEqual(OnboardingLink.modelActivation.scheme, "https")
+        XCTAssertEqual(OnboardingLink.apiKey.scheme, "https")
+        XCTAssertEqual(OnboardingLink.documentation.host, "www.volcengine.com")
+        XCTAssertEqual(OnboardingLink.apiKey.host, "console.volcengine.com")
+    }
+
     func testDiagnosticReportOmitsSensitiveValuesAndErrorDetails() {
         let report = DiagnosticReport(
             appVersion: "0.16.0",
