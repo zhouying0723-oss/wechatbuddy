@@ -21,6 +21,9 @@
 		A1000000000000000000000C /* WeChatInputReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000F /* WeChatInputReader.swift */; };
 		A1000000000000000000000D /* ClipboardDraftReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010 /* ClipboardDraftReader.swift */; };
 		A1000000000000000000000E /* WeChatInputWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* WeChatInputWriter.swift */; };
+		A1000000000000000000000F /* KeychainAPIKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012 /* KeychainAPIKeyStore.swift */; };
+		A10000000000000000000010 /* APIKeySettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000013 /* APIKeySettingsModel.swift */; };
+		A10000000000000000000011 /* APIKeySettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000014 /* APIKeySettingsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +54,9 @@
 		A2000000000000000000000F /* WeChatInputReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeChatInputReader.swift; sourceTree = "<group>"; };
 		A20000000000000000000010 /* ClipboardDraftReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardDraftReader.swift; sourceTree = "<group>"; };
 		A20000000000000000000011 /* WeChatInputWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeChatInputWriter.swift; sourceTree = "<group>"; };
+		A20000000000000000000012 /* KeychainAPIKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainAPIKeyStore.swift; sourceTree = "<group>"; };
+		A20000000000000000000013 /* APIKeySettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeySettingsModel.swift; sourceTree = "<group>"; };
+		A20000000000000000000014 /* APIKeySettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeySettingsTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +124,7 @@
 			children = (
 				A20000000000000000000003 /* MenuBarContent.swift */,
 				A20000000000000000000004 /* SettingsView.swift */,
+				A20000000000000000000013 /* APIKeySettingsModel.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -126,6 +133,7 @@
 			isa = PBXGroup;
 			children = (
 				A20000000000000000000007 /* AppStatusTests.swift */,
+				A20000000000000000000014 /* APIKeySettingsTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -155,6 +163,7 @@
 			isa = PBXGroup;
 			children = (
 				A2000000000000000000000B /* TextRewriting.swift */,
+				A20000000000000000000012 /* KeychainAPIKeyStore.swift */,
 			);
 			path = AI;
 			sourceTree = "<group>";
@@ -270,8 +279,10 @@
 				A1000000000000000000000D /* ClipboardDraftReader.swift in Sources */,
 				A1000000000000000000000E /* WeChatInputWriter.swift in Sources */,
 				A10000000000000000000008 /* TextRewriting.swift in Sources */,
+				A1000000000000000000000F /* KeychainAPIKeyStore.swift in Sources */,
 				A10000000000000000000003 /* MenuBarContent.swift in Sources */,
 				A10000000000000000000004 /* SettingsView.swift in Sources */,
+				A10000000000000000000010 /* APIKeySettingsModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,6 +291,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000005 /* AppStatusTests.swift in Sources */,
+				A10000000000000000000011 /* APIKeySettingsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -331,7 +343,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.7.1;
+				MARKETING_VERSION = 0.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -352,7 +364,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.7.1;
+				MARKETING_VERSION = 0.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
