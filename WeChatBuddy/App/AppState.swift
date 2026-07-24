@@ -25,20 +25,41 @@ enum AccessibilityAuthorizationStatus: Equatable {
     }
 }
 
+enum WeChatFrontmostStatus: Equatable {
+    case frontmost
+    case notFrontmost
+
+    var title: String {
+        switch self {
+        case .frontmost:
+            "是"
+        case .notFrontmost:
+            "否"
+        }
+    }
+}
+
 @MainActor
 final class AppState: ObservableObject {
     @Published private(set) var status: AppStatus = .ready
     @Published private(set) var accessibilityStatus: AccessibilityAuthorizationStatus
+    @Published private(set) var weChatFrontmostStatus: WeChatFrontmostStatus
 
     private let accessibilityAuthorizer: any AccessibilityAuthorizing
+    private let weChatApplicationDetector: any WeChatApplicationDetecting
 
     init(
-        accessibilityAuthorizer: any AccessibilityAuthorizing = SystemAccessibilityAuthorizer()
+        accessibilityAuthorizer: any AccessibilityAuthorizing = SystemAccessibilityAuthorizer(),
+        weChatApplicationDetector: any WeChatApplicationDetecting = SystemWeChatApplicationDetector()
     ) {
         self.accessibilityAuthorizer = accessibilityAuthorizer
+        self.weChatApplicationDetector = weChatApplicationDetector
         accessibilityStatus = accessibilityAuthorizer.isTrusted()
             ? .authorized
             : .notAuthorized
+        weChatFrontmostStatus = weChatApplicationDetector.isWeChatFrontmost()
+            ? .frontmost
+            : .notFrontmost
     }
 
     func refreshAccessibilityStatus() {
@@ -54,5 +75,11 @@ final class AppState: ObservableObject {
 
     func openAccessibilitySettings() {
         accessibilityAuthorizer.openSystemSettings()
+    }
+
+    func refreshWeChatFrontmostStatus() {
+        weChatFrontmostStatus = weChatApplicationDetector.isWeChatFrontmost()
+            ? .frontmost
+            : .notFrontmost
     }
 }

@@ -25,6 +25,30 @@ final class AppStatusTests: XCTestCase {
         XCTAssertEqual(state.accessibilityStatus, .authorized)
         XCTAssertEqual(authorizer.requestCount, 1)
     }
+
+    @MainActor
+    func testWeChatStatusIsFrontmostWhenDetectorMatches() {
+        let state = AppState(
+            accessibilityAuthorizer: AccessibilityAuthorizerMock(isTrusted: true),
+            weChatApplicationDetector: WeChatApplicationDetectorMock(isFrontmost: true)
+        )
+
+        XCTAssertEqual(state.weChatFrontmostStatus, .frontmost)
+    }
+
+    @MainActor
+    func testWeChatStatusRefreshesWhenFrontmostApplicationChanges() {
+        let detector = WeChatApplicationDetectorMock(isFrontmost: false)
+        let state = AppState(
+            accessibilityAuthorizer: AccessibilityAuthorizerMock(isTrusted: true),
+            weChatApplicationDetector: detector
+        )
+
+        detector.isFrontmost = true
+        state.refreshWeChatFrontmostStatus()
+
+        XCTAssertEqual(state.weChatFrontmostStatus, .frontmost)
+    }
 }
 
 private final class AccessibilityAuthorizerMock: AccessibilityAuthorizing, @unchecked Sendable {
@@ -45,4 +69,17 @@ private final class AccessibilityAuthorizerMock: AccessibilityAuthorizing, @unch
     }
 
     func openSystemSettings() {}
+}
+
+@MainActor
+private final class WeChatApplicationDetectorMock: WeChatApplicationDetecting {
+    var isFrontmost: Bool
+
+    init(isFrontmost: Bool) {
+        self.isFrontmost = isFrontmost
+    }
+
+    func isWeChatFrontmost() -> Bool {
+        isFrontmost
+    }
 }

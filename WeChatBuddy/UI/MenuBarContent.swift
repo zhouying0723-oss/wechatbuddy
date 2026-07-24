@@ -12,6 +12,8 @@ struct MenuBarContent: View {
 
         Text("辅助功能：\(appState.accessibilityStatus.title)")
 
+        Text("微信前台：\(appState.weChatFrontmostStatus.title)")
+
         if appState.accessibilityStatus == .notAuthorized {
             Button("请求辅助功能权限") {
                 appState.requestAccessibilityAccess()
@@ -37,6 +39,7 @@ struct MenuBarContent: View {
         .keyboardShortcut("q")
         .onAppear {
             appState.refreshAccessibilityStatus()
+            appState.refreshWeChatFrontmostStatus()
         }
     }
 }
