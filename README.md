@@ -4,7 +4,7 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 
 ## 项目状态
 
-当前版本：`v0.17.0`
+当前版本：`v0.18.0`
 
 当前阶段：阶段 5，体验与发布准备。
 
@@ -19,6 +19,7 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 - 模型服务 API Key 仅保存在 macOS Keychain，不写入代码、日志或 Git。
 - 火山方舟为默认供应商，Base URL 与模型 ID 可在设置页配置。
 - 默认改写语气可选择自然、友好、专业或简洁，并保存在本机偏好中。
+- 支持编辑自定义改写要求，并与不可覆盖的固定安全规则组合使用。
 - 模型请求支持取消，并对超时、断网和服务限流提供明确提示。
 - `Command + Shift + R` 已串联草稿读取、AI 改写、二次校验和安全写回。
 - 短文本改写默认关闭深度思考，并使用 15 秒超时避免长时间等待。
@@ -33,9 +34,10 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 2. 在向导中打开[火山方舟控制台](https://console.volcengine.com/ark/region:ark+cn-beijing/openManagement)，开通需要使用的模型。
 3. 前往[API Key 管理](https://console.volcengine.com/ark/region:ark+cn-beijing/apikey)创建 API Key。
 4. 在 WeChatBuddy 设置中保存 API Key 和模型 ID，并测试模型连接。
-5. 打开微信聊天，在输入框中输入草稿。
-6. 按下 `Command + Shift + R`，等待改写结果写回。
-7. 检查改写内容后手动发送。
+5. 可在“改写偏好”中选择语气并填写自定义改写要求。
+6. 打开微信聊天，在输入框中输入草稿。
+7. 按下 `Command + Shift + R`，等待改写结果写回。
+8. 检查改写内容后手动发送。
 
 火山方舟的详细说明见[官方文档](https://www.volcengine.com/docs/82379/)。
 

@@ -24,7 +24,13 @@ final class RewriteCoordinatorTests: XCTestCase {
         XCTAssertEqual(result.text, "优化草稿")
         XCTAssertEqual(
             requests,
-            [RewriteRequest(text: "原始草稿", tone: .friendly)]
+            [
+                RewriteRequest(
+                    text: "原始草稿",
+                    tone: .friendly,
+                    customInstruction: "保持自然"
+                )
+            ]
         )
         XCTAssertEqual(reader.readCount, 2)
         XCTAssertEqual(writer.writtenTexts, ["优化草稿"])
@@ -146,4 +152,10 @@ private struct CoordinatorPreferencesStoreMock: RewritePreferencesStoring {
     }
 
     func saveTone(_ tone: RewriteTone) {}
+
+    func loadCustomInstruction() -> String {
+        "保持自然"
+    }
+
+    func saveCustomInstruction(_ instruction: String) {}
 }

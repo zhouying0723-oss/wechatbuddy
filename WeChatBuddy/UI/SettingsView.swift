@@ -135,8 +135,40 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                Button("保存改写偏好") {
-                    rewritePreferencesModel.save()
+                Text("自定义改写要求")
+                    .font(.headline)
+
+                TextEditor(text: $rewritePreferencesModel.customInstruction)
+                    .font(.body)
+                    .frame(minHeight: 90)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(.separator, lineWidth: 1)
+                    }
+
+                Text(
+                    "\(rewritePreferencesModel.customInstruction.count) / \(RewritePromptBuilder.maximumCustomInstructionLength) 字符。固定安全规则不可修改。"
+                )
+                .font(.caption)
+                .foregroundStyle(
+                    rewritePreferencesModel.customInstruction.count
+                        > RewritePromptBuilder.maximumCustomInstructionLength
+                        ? .red
+                        : .secondary
+                )
+
+                HStack {
+                    Button("保存改写偏好") {
+                        rewritePreferencesModel.save()
+                    }
+                    .disabled(
+                        rewritePreferencesModel.customInstruction.count
+                            > RewritePromptBuilder.maximumCustomInstructionLength
+                    )
+
+                    Button("恢复默认要求") {
+                        rewritePreferencesModel.restoreDefaultInstruction()
+                    }
                 }
             }
 
