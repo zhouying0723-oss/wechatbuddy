@@ -109,6 +109,21 @@ final class AppStatusTests: XCTestCase {
         )
     }
 
+    func testWeChatProcessPathMustBeInsideOfficialApplicationBundle() {
+        XCTAssertTrue(
+            WeChatProcessDiscovery.isExecutablePath(
+                "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx Helper",
+                insideBundleAtPath: "/Applications/WeChat.app"
+            )
+        )
+        XCTAssertFalse(
+            WeChatProcessDiscovery.isExecutablePath(
+                "/tmp/WeChat.app/Contents/MacOS/WeChatAppEx Helper",
+                insideBundleAtPath: "/Applications/WeChat.app"
+            )
+        )
+    }
+
     @MainActor
     func testReadWeChatDraftShowsTextWhenRequirementsAreMet() {
         let state = AppState(

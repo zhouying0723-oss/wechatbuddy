@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import Darwin
 import Foundation
 
 @MainActor
@@ -42,21 +43,20 @@ struct SystemWeChatInputReader: WeChatInputReading {
             throw WeChatInputReaderError.accessibilityNotAuthorized
         }
 
-        let applications = NSWorkspace.shared.runningApplications
-            .filter(isWeChatApplication)
-            .sorted { lhs, rhs in
-                applicationPriority(lhs) < applicationPriority(rhs)
-            }
-
-        guard !applications.isEmpty else {
+        guard let mainApplication = NSRunningApplication.runningApplications(
+            withBundleIdentifier: SystemWeChatApplicationDetector.bundleIdentifier
+        ).first(where: { !$0.isTerminated }) else {
             throw WeChatInputReaderError.weChatNotRunning
         }
 
+        let processes = WeChatProcessDiscovery().processes(
+            mainApplication: mainApplication
+        )
         var diagnostics: [String] = []
 
-        for application in applications {
+        for process in processes {
             let applicationElement = AXUIElementCreateApplication(
-                application.processIdentifier
+                process.processIdentifier
             )
             _ = AXUIElementSetAttributeValue(
                 applicationElement,
@@ -82,29 +82,12 @@ struct SystemWeChatInputReader: WeChatInputReading {
                 return try draft(from: editableElement)
             }
 
-            let identifier = application.bundleIdentifier ?? "PID \(application.processIdentifier)"
-            diagnostics.append("\(identifier)：\(searchResult.diagnostic)")
+            diagnostics.append("\(process.displayName)：\(searchResult.diagnostic)")
         }
 
         throw WeChatInputReaderError.editableElementUnavailable(
             diagnostics.joined(separator: "；")
         )
-    }
-
-    private func isWeChatApplication(_ application: NSRunningApplication) -> Bool {
-        guard !application.isTerminated else {
-            return false
-        }
-
-        let bundleIdentifier = application.bundleIdentifier ?? ""
-        return bundleIdentifier == SystemWeChatApplicationDetector.bundleIdentifier
-            || bundleIdentifier.hasPrefix("com.tencent.flue.WeChatAppEx")
-    }
-
-    private func applicationPriority(_ application: NSRunningApplication) -> Int {
-        application.bundleIdentifier == SystemWeChatApplicationDetector.bundleIdentifier
-            ? 0
-            : 1
     }
 
     private func draft(from element: AXUIElement) throws -> String {
@@ -324,5 +307,93 @@ struct SystemWeChatInputReader: WeChatInputReading {
         }
 
         return value as? [AXUIElement] ?? []
+    }
+}
+
+struct WeChatProcess: Equatable {
+    let processIdentifier: pid_t
+    let executablePath: String
+
+    var displayName: String {
+        let executableName = URL(fileURLWithPath: executablePath).lastPathComponent
+        return "\(executableName) [PID \(processIdentifier)]"
+    }
+}
+
+struct WeChatProcessDiscovery {
+    func processes(mainApplication: NSRunningApplication) -> [WeChatProcess] {
+        guard let bundleURL = mainApplication.bundleURL else {
+            return []
+        }
+
+        let bundlePath = bundleURL.standardizedFileURL.path
+        return allProcessIdentifiers()
+            .compactMap(process)
+            .filter {
+                Self.isExecutablePath(
+                    $0.executablePath,
+                    insideBundleAtPath: bundlePath
+                )
+            }
+            .sorted { lhs, rhs in
+                if lhs.processIdentifier == mainApplication.processIdentifier {
+                    return true
+                }
+                if rhs.processIdentifier == mainApplication.processIdentifier {
+                    return false
+                }
+                return lhs.processIdentifier < rhs.processIdentifier
+            }
+    }
+
+    static func isExecutablePath(
+        _ executablePath: String,
+        insideBundleAtPath bundlePath: String
+    ) -> Bool {
+        let standardizedExecutablePath = URL(fileURLWithPath: executablePath)
+            .standardizedFileURL.path
+        let standardizedBundlePath = URL(fileURLWithPath: bundlePath)
+            .standardizedFileURL.path
+
+        return standardizedExecutablePath.hasPrefix(
+            "\(standardizedBundlePath)/Contents/"
+        )
+    }
+
+    private func allProcessIdentifiers() -> [pid_t] {
+        let capacity = proc_listallpids(nil, 0)
+        guard capacity > 0 else {
+            return []
+        }
+
+        var processIdentifiers = [pid_t](repeating: 0, count: Int(capacity))
+        let count = proc_listallpids(
+            &processIdentifiers,
+            Int32(processIdentifiers.count * MemoryLayout<pid_t>.size)
+        )
+
+        guard count > 0 else {
+            return []
+        }
+
+        return Array(processIdentifiers.prefix(Int(count)))
+    }
+
+    private func process(processIdentifier: pid_t) -> WeChatProcess? {
+        var pathBuffer = [CChar](repeating: 0, count: 4_096)
+        let pathLength = proc_pidpath(
+            processIdentifier,
+            &pathBuffer,
+            UInt32(pathBuffer.count)
+        )
+
+        guard pathLength > 0 else {
+            return nil
+        }
+
+        return WeChatProcess(
+            processIdentifier: processIdentifier,
+            executablePath: String(cString: pathBuffer)
+        )
     }
 }
