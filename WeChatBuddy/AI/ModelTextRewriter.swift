@@ -44,7 +44,8 @@ struct ModelTextRewriter: TextRewriting {
         let result = try await ModelAPIClient(
             configuration: configuration,
             apiKey: apiKey,
-            transport: transport
+            transport: transport,
+            timeout: 15
         ).complete(chatRequest)
 
         return RewriteResult(text: result.text)

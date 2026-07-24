@@ -190,7 +190,9 @@ struct ModelAPIClient: ModelAPIRequesting {
                     .init(role: "system", content: chatRequest.systemPrompt),
                     .init(role: "user", content: chatRequest.userText)
                 ],
-                stream: false
+                stream: false,
+                thinking: .init(type: "disabled"),
+                maxTokens: 512
             )
         )
         return request
@@ -250,9 +252,23 @@ private struct ChatCompletionRequestBody: Encodable {
         let content: String
     }
 
+    struct Thinking: Encodable {
+        let type: String
+    }
+
     let model: String
     let messages: [Message]
     let stream: Bool
+    let thinking: Thinking
+    let maxTokens: Int
+
+    private enum CodingKeys: String, CodingKey {
+        case model
+        case messages
+        case stream
+        case thinking
+        case maxTokens = "max_tokens"
+    }
 }
 
 private struct ChatCompletionEnvelope: Decodable {

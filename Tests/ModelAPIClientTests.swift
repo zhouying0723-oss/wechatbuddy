@@ -38,6 +38,10 @@ final class ModelAPIClientTests: XCTestCase {
         )
         XCTAssertEqual(json["model"] as? String, "model-test")
         XCTAssertEqual(json["stream"] as? Bool, false)
+        XCTAssertEqual(json["max_tokens"] as? Int, 512)
+
+        let thinking = try XCTUnwrap(json["thinking"] as? [String: Any])
+        XCTAssertEqual(thinking["type"] as? String, "disabled")
 
         let messages = try XCTUnwrap(json["messages"] as? [[String: Any]])
         XCTAssertEqual(messages.count, 2)
