@@ -50,7 +50,7 @@ struct SystemWeChatInputReader: WeChatInputReading {
         }
 
         _ = mainApplication.activate(options: [.activateIgnoringOtherApps])
-        RunLoop.current.run(until: Date().addingTimeInterval(0.15))
+        RunLoop.current.run(until: Date().addingTimeInterval(0.30))
 
         let processes = WeChatProcessDiscovery().processes(
             mainApplication: mainApplication

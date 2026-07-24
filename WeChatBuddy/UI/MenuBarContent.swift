@@ -36,14 +36,14 @@ struct MenuBarContent: View {
 
         Button("读取微信输入框") {
             Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(150))
+                try? await Task.sleep(for: .milliseconds(350))
                 presentDraftReadResult(appState.readWeChatDraft())
             }
         }
 
         Button("测试写回微信输入框") {
             Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(150))
+                try? await Task.sleep(for: .milliseconds(350))
                 presentDraftWriteResult(appState.testWriteWeChatDraft())
             }
         }

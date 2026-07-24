@@ -181,6 +181,20 @@ final class AppStatusTests: XCTestCase {
         }
     }
 
+    func testClipboardCopyRetriesUntilMaximumAttempt() {
+        let policy = ClipboardCopyRetryPolicy(maximumAttempts: 3)
+
+        XCTAssertTrue(
+            policy.shouldRetry(clipboardChanged: false, completedAttempts: 1)
+        )
+        XCTAssertFalse(
+            policy.shouldRetry(clipboardChanged: true, completedAttempts: 1)
+        )
+        XCTAssertFalse(
+            policy.shouldRetry(clipboardChanged: false, completedAttempts: 3)
+        )
+    }
+
     func testDraftWriteValidationRejectsEmptyReplacement() {
         XCTAssertThrowsError(
             try WeChatDraftWriteValidator.validate(" \n")

@@ -43,8 +43,18 @@ struct ClipboardDraftValidator {
     }
 }
 
+struct ClipboardCopyRetryPolicy {
+    let maximumAttempts: Int
+
+    func shouldRetry(clipboardChanged: Bool, completedAttempts: Int) -> Bool {
+        !clipboardChanged && completedAttempts < maximumAttempts
+    }
+}
+
 @MainActor
 struct ClipboardDraftReader {
+    private let retryPolicy = ClipboardCopyRetryPolicy(maximumAttempts: 3)
+
     func readSelectedInput() throws -> String {
         let pasteboard = NSPasteboard.general
         let snapshot = PasteboardSnapshot(pasteboard: pasteboard)
@@ -53,10 +63,17 @@ struct ClipboardDraftReader {
             snapshot.restore(to: pasteboard)
         }
 
-        try postCommandKey(keyCode: 0) // A
-        RunLoop.current.run(until: Date().addingTimeInterval(0.05))
-        try postCommandKey(keyCode: 8) // C
-        RunLoop.current.run(until: Date().addingTimeInterval(0.12))
+        var completedAttempts = 0
+        repeat {
+            completedAttempts += 1
+            try postCommandKey(keyCode: 0) // A
+            RunLoop.current.run(until: Date().addingTimeInterval(0.08))
+            try postCommandKey(keyCode: 8) // C
+            RunLoop.current.run(until: Date().addingTimeInterval(0.15))
+        } while retryPolicy.shouldRetry(
+            clipboardChanged: pasteboard.changeCount != originalChangeCount,
+            completedAttempts: completedAttempts
+        )
 
         return try ClipboardDraftValidator.validate(
             copiedText: pasteboard.string(forType: .string),
