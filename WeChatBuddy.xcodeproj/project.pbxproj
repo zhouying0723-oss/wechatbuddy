@@ -33,6 +33,9 @@
 		A10000000000000000000018 /* ModelConnectionTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001B /* ModelConnectionTester.swift */; };
 		A10000000000000000000019 /* ModelConnectionTestModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001C /* ModelConnectionTestModel.swift */; };
 		A1000000000000000000001A /* ModelConnectionTesterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001D /* ModelConnectionTesterTests.swift */; };
+		A1000000000000000000001B /* RewritePreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001E /* RewritePreferencesStore.swift */; };
+		A1000000000000000000001C /* RewritePreferencesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001F /* RewritePreferencesModel.swift */; };
+		A1000000000000000000001D /* RewritePromptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000020 /* RewritePromptTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +78,9 @@
 		A2000000000000000000001B /* ModelConnectionTester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelConnectionTester.swift; sourceTree = "<group>"; };
 		A2000000000000000000001C /* ModelConnectionTestModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelConnectionTestModel.swift; sourceTree = "<group>"; };
 		A2000000000000000000001D /* ModelConnectionTesterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelConnectionTesterTests.swift; sourceTree = "<group>"; };
+		A2000000000000000000001E /* RewritePreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewritePreferencesStore.swift; sourceTree = "<group>"; };
+		A2000000000000000000001F /* RewritePreferencesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewritePreferencesModel.swift; sourceTree = "<group>"; };
+		A20000000000000000000020 /* RewritePromptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewritePromptTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +151,7 @@
 				A20000000000000000000013 /* APIKeySettingsModel.swift */,
 				A20000000000000000000017 /* ModelProviderSettingsModel.swift */,
 				A2000000000000000000001C /* ModelConnectionTestModel.swift */,
+				A2000000000000000000001F /* RewritePreferencesModel.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -157,6 +164,7 @@
 				A20000000000000000000018 /* ModelProviderSettingsTests.swift */,
 				A2000000000000000000001A /* ModelAPIClientTests.swift */,
 				A2000000000000000000001D /* ModelConnectionTesterTests.swift */,
+				A20000000000000000000020 /* RewritePromptTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -191,6 +199,7 @@
 				A20000000000000000000016 /* ModelProviderSettingsStore.swift */,
 				A20000000000000000000019 /* ModelAPIClient.swift */,
 				A2000000000000000000001B /* ModelConnectionTester.swift */,
+				A2000000000000000000001E /* RewritePreferencesStore.swift */,
 			);
 			path = AI;
 			sourceTree = "<group>";
@@ -312,6 +321,8 @@
 				A10000000000000000000016 /* ModelAPIClient.swift in Sources */,
 				A10000000000000000000018 /* ModelConnectionTester.swift in Sources */,
 				A10000000000000000000019 /* ModelConnectionTestModel.swift in Sources */,
+				A1000000000000000000001B /* RewritePreferencesStore.swift in Sources */,
+				A1000000000000000000001C /* RewritePreferencesModel.swift in Sources */,
 				A10000000000000000000003 /* MenuBarContent.swift in Sources */,
 				A10000000000000000000004 /* SettingsView.swift in Sources */,
 				A10000000000000000000010 /* APIKeySettingsModel.swift in Sources */,
@@ -328,6 +339,7 @@
 				A10000000000000000000015 /* ModelProviderSettingsTests.swift in Sources */,
 				A10000000000000000000017 /* ModelAPIClientTests.swift in Sources */,
 				A1000000000000000000001A /* ModelConnectionTesterTests.swift in Sources */,
+				A1000000000000000000001D /* RewritePromptTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -379,7 +391,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.11.1;
+				MARKETING_VERSION = 0.12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -400,7 +412,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.11.1;
+				MARKETING_VERSION = 0.12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wechatbuddy.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

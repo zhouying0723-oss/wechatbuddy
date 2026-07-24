@@ -5,11 +5,14 @@ struct SettingsView: View {
     @StateObject private var apiKeyModel: APIKeySettingsModel
     @StateObject private var providerModel: ModelProviderSettingsModel
     @StateObject private var connectionTestModel: ModelConnectionTestModel
+    @StateObject private var rewritePreferencesModel: RewritePreferencesModel
 
     init(
         apiKeyStore: any APIKeyStoring = KeychainAPIKeyStore(),
         providerStore: any ModelProviderSettingsStoring =
             UserDefaultsModelProviderSettingsStore(),
+        rewritePreferencesStore: any RewritePreferencesStoring =
+            UserDefaultsRewritePreferencesStore(),
         connectionTester: (any ModelConnectionTesting)? = nil
     ) {
         _apiKeyModel = StateObject(
@@ -24,6 +27,11 @@ struct SettingsView: View {
                     apiKeyStore: apiKeyStore,
                     configurationStore: providerStore
                 )
+            )
+        )
+        _rewritePreferencesModel = StateObject(
+            wrappedValue: RewritePreferencesModel(
+                store: rewritePreferencesStore
             )
         )
     }
@@ -106,14 +114,31 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+
+            Section("改写偏好") {
+                Picker("默认语气", selection: $rewritePreferencesModel.tone) {
+                    ForEach(RewriteTone.allCases) { tone in
+                        Text(tone.title).tag(tone)
+                    }
+                }
+
+                Text(rewritePreferencesModel.tone.instruction)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Button("保存改写偏好") {
+                    rewritePreferencesModel.save()
+                }
+            }
         }
         .formStyle(.grouped)
         .padding(12)
-        .frame(width: 500, height: 560)
+        .frame(width: 500, height: 680)
         .onAppear {
             NSApplication.shared.activate(ignoringOtherApps: true)
             providerModel.refresh()
             apiKeyModel.refresh()
+            rewritePreferencesModel.refresh()
         }
     }
 
