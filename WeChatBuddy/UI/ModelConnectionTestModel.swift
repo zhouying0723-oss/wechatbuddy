@@ -34,6 +34,13 @@ final class ModelConnectionTestModel: ObservableObject {
         status == .testing
     }
 
+    var copyableErrorMessage: String? {
+        guard case let .failure(message) = status else {
+            return nil
+        }
+        return message
+    }
+
     func testConnection() async {
         guard !isTesting else {
             return

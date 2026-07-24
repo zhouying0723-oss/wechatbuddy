@@ -65,7 +65,19 @@ final class ModelConnectionTesterTests: XCTestCase {
         await model.testConnection()
 
         XCTAssertEqual(model.status, .failure("请先保存 API Key"))
+        XCTAssertEqual(model.copyableErrorMessage, "请先保存 API Key")
         XCTAssertFalse(model.isTesting)
+    }
+
+    @MainActor
+    func testSettingsModelHasNoCopyableErrorAfterSuccess() async {
+        let model = ModelConnectionTestModel(
+            tester: ModelConnectionTestingMock(result: .success)
+        )
+
+        await model.testConnection()
+
+        XCTAssertNil(model.copyableErrorMessage)
     }
 }
 

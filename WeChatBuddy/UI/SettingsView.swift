@@ -76,20 +76,31 @@ struct SettingsView: View {
                 Text(connectionTestModel.status.title)
                     .font(.caption)
                     .foregroundStyle(connectionTestStatusColor)
+                    .textSelection(.enabled)
 
-                Button {
-                    Task {
-                        await connectionTestModel.testConnection()
+                HStack {
+                    Button {
+                        Task {
+                            await connectionTestModel.testConnection()
+                        }
+                    } label: {
+                        if connectionTestModel.isTesting {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Text("测试模型连接")
+                        }
                     }
-                } label: {
-                    if connectionTestModel.isTesting {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Text("测试模型连接")
+                    .disabled(connectionTestModel.isTesting)
+
+                    if let errorMessage =
+                        connectionTestModel.copyableErrorMessage
+                    {
+                        Button("复制错误信息") {
+                            copyToPasteboard(errorMessage)
+                        }
                     }
                 }
-                .disabled(connectionTestModel.isTesting)
 
                 Text("测试会向已保存的模型发送一条最小请求，可能产生少量 Token 消耗。")
                     .font(.caption)
@@ -137,5 +148,11 @@ struct SettingsView: View {
         case .idle, .testing:
             .secondary
         }
+    }
+
+    private func copyToPasteboard(_ text: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
     }
 }
