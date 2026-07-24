@@ -102,8 +102,10 @@ final class AppStatusTests: XCTestCase {
 
     func testNoFocusedValueHasActionableErrorMessage() {
         XCTAssertEqual(
-            WeChatInputReaderError.editableElementUnavailable.errorDescription,
-            "在微信当前窗口中找不到可编辑输入框"
+            WeChatInputReaderError.editableElementUnavailable(
+                "扫描 10 个控件"
+            ).errorDescription,
+            "在微信当前窗口中找不到可编辑输入框（扫描 10 个控件）"
         )
     }
 

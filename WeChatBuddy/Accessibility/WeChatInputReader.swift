@@ -11,7 +11,7 @@ enum WeChatInputReaderError: LocalizedError, Equatable {
     case accessibilityNotAuthorized
     case weChatNotRunning
     case focusedElementUnavailable(AXError)
-    case editableElementUnavailable
+    case editableElementUnavailable(String)
     case unsupportedRole(String)
     case valueNotReadable
     case emptyDraft
@@ -24,8 +24,8 @@ enum WeChatInputReaderError: LocalizedError, Equatable {
             "微信未运行"
         case let .focusedElementUnavailable(error):
             "无法获取微信焦点控件（AX 错误 \(error.rawValue)）"
-        case .editableElementUnavailable:
-            "在微信当前窗口中找不到可编辑输入框"
+        case let .editableElementUnavailable(diagnostic):
+            "在微信当前窗口中找不到可编辑输入框（\(diagnostic)）"
         case let .unsupportedRole(role):
             "当前焦点不是可编辑输入框（角色：\(role)）"
         case .valueNotReadable:
@@ -49,6 +49,11 @@ struct SystemWeChatInputReader: WeChatInputReading {
         }
 
         let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
+        _ = AXUIElementSetAttributeValue(
+            applicationElement,
+            "AXEnhancedUserInterface" as CFString,
+            kCFBooleanTrue
+        )
         let focusedElementResult = elementAttribute(
             kAXFocusedUIElementAttribute,
             from: applicationElement
@@ -61,20 +66,23 @@ struct SystemWeChatInputReader: WeChatInputReading {
             isEditable(focusedElement)
         {
             element = focusedElement
-        } else if let editableElement = editableElementInFocusedWindow(
-            of: applicationElement
-        ) {
-            element = editableElement
-        } else if focusedElementResult.error == .success {
-            let role = focusedElementResult.element
-                .flatMap { stringAttribute(kAXRoleAttribute, from: $0) } ?? "未知"
-            throw WeChatInputReaderError.unsupportedRole(role)
-        } else if focusedElementResult.error == .noValue {
-            throw WeChatInputReaderError.editableElementUnavailable
         } else {
-            throw WeChatInputReaderError.focusedElementUnavailable(
-                focusedElementResult.error
-            )
+            let searchResult = editableElementInFocusedWindow(of: applicationElement)
+            if let editableElement = searchResult.element {
+            element = editableElement
+            } else if focusedElementResult.error == .success {
+                let role = focusedElementResult.element
+                    .flatMap { stringAttribute(kAXRoleAttribute, from: $0) } ?? "未知"
+                throw WeChatInputReaderError.unsupportedRole(role)
+            } else if focusedElementResult.error == .noValue {
+                throw WeChatInputReaderError.editableElementUnavailable(
+                    searchResult.diagnostic
+                )
+            } else {
+                throw WeChatInputReaderError.focusedElementUnavailable(
+                    focusedElementResult.error
+                )
+            }
         }
 
         guard let draft = stringAttribute(kAXValueAttribute, from: element) else {
@@ -96,7 +104,7 @@ struct SystemWeChatInputReader: WeChatInputReading {
 
     private func editableElementInFocusedWindow(
         of applicationElement: AXUIElement
-    ) -> AXUIElement? {
+    ) -> (element: AXUIElement?, diagnostic: String) {
         let focusedWindow = elementAttribute(
             kAXFocusedWindowAttribute,
             from: applicationElement
@@ -104,23 +112,41 @@ struct SystemWeChatInputReader: WeChatInputReading {
 
         let root = focusedWindow ?? firstWindow(of: applicationElement)
         guard let root else {
-            return nil
+            return (nil, "未获取到微信窗口")
         }
 
         var queue = [root]
+        var visitedElements = Set<CFHashCode>()
         var firstEditableElement: AXUIElement?
         var firstNonEmptyEditableElement: AXUIElement?
+        var roleCounts: [String: Int] = [:]
+        var settableValueCount = 0
         var visitedCount = 0
 
-        while !queue.isEmpty, visitedCount < 500 {
+        while !queue.isEmpty, visitedCount < 5_000 {
             let element = queue.removeFirst()
+            let elementHash = CFHash(element)
+            guard visitedElements.insert(elementHash).inserted else {
+                continue
+            }
+
             visitedCount += 1
+            let role = stringAttribute(kAXRoleAttribute, from: element) ?? "未知"
+            roleCounts[role, default: 0] += 1
+
+            if isValueSettable(element) {
+                settableValueCount += 1
+            }
 
             if isEditable(element) {
                 firstEditableElement = firstEditableElement ?? element
 
                 if boolAttribute(kAXFocusedAttribute, from: element) == true {
-                    return element
+                    return (element, diagnostic(
+                        visitedCount: visitedCount,
+                        roleCounts: roleCounts,
+                        settableValueCount: settableValueCount
+                    ))
                 }
 
                 if
@@ -132,13 +158,47 @@ struct SystemWeChatInputReader: WeChatInputReading {
                 }
             }
 
-            queue.append(contentsOf: elementArrayAttribute(
-                kAXChildrenAttribute,
-                from: element
-            ))
+            for attribute in childAttributes {
+                queue.append(contentsOf: elementArrayAttribute(
+                    attribute,
+                    from: element
+                ))
+            }
         }
 
-        return firstNonEmptyEditableElement ?? firstEditableElement
+        return (
+            firstNonEmptyEditableElement ?? firstEditableElement,
+            diagnostic(
+                visitedCount: visitedCount,
+                roleCounts: roleCounts,
+                settableValueCount: settableValueCount
+            )
+        )
+    }
+
+    private var childAttributes: [String] {
+        [
+            kAXChildrenAttribute,
+            kAXVisibleChildrenAttribute,
+            kAXContentsAttribute,
+            NSAccessibility.Attribute.childrenInNavigationOrderAttribute.rawValue
+        ]
+    }
+
+    private func diagnostic(
+        visitedCount: Int,
+        roleCounts: [String: Int],
+        settableValueCount: Int
+    ) -> String {
+        let roles = roleCounts
+            .sorted { lhs, rhs in
+                lhs.value == rhs.value ? lhs.key < rhs.key : lhs.value > rhs.value
+            }
+            .prefix(8)
+            .map { "\($0.key):\($0.value)" }
+            .joined(separator: ", ")
+
+        return "扫描 \(visitedCount) 个控件，可写 Value \(settableValueCount) 个，角色 \(roles)"
     }
 
     private func firstWindow(of applicationElement: AXUIElement) -> AXUIElement? {
@@ -155,14 +215,18 @@ struct SystemWeChatInputReader: WeChatInputReading {
             return false
         }
 
+        return isValueSettable(element)
+    }
+
+    private func isValueSettable(_ element: AXUIElement) -> Bool {
         var valueIsSettable = DarwinBoolean(false)
-        let settableError = AXUIElementIsAttributeSettable(
+        let error = AXUIElementIsAttributeSettable(
             element,
             kAXValueAttribute as CFString,
             &valueIsSettable
         )
 
-        return settableError == .success && valueIsSettable.boolValue
+        return error == .success && valueIsSettable.boolValue
     }
 
     private func stringAttribute(
@@ -212,11 +276,15 @@ struct SystemWeChatInputReader: WeChatInputReading {
             &value
         )
 
-        guard error == .success, let value else {
+        guard
+            error == .success,
+            let value,
+            CFGetTypeID(value) == AXUIElementGetTypeID()
+        else {
             return (nil, error)
         }
 
-        return (value as! AXUIElement, error)
+        return ((value as! AXUIElement), error)
     }
 
     private func elementArrayAttribute(
