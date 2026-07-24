@@ -11,6 +11,7 @@ enum WeChatInputReaderError: LocalizedError, Equatable {
     case accessibilityNotAuthorized
     case weChatNotRunning
     case focusedElementUnavailable(AXError)
+    case editableElementUnavailable
     case unsupportedRole(String)
     case valueNotReadable
     case emptyDraft
@@ -23,6 +24,8 @@ enum WeChatInputReaderError: LocalizedError, Equatable {
             "微信未运行"
         case let .focusedElementUnavailable(error):
             "无法获取微信焦点控件（AX 错误 \(error.rawValue)）"
+        case .editableElementUnavailable:
+            "在微信当前窗口中找不到可编辑输入框"
         case let .unsupportedRole(role):
             "当前焦点不是可编辑输入框（角色：\(role)）"
         case .valueNotReadable:
@@ -46,38 +49,35 @@ struct SystemWeChatInputReader: WeChatInputReading {
         }
 
         let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
-        var focusedElementValue: CFTypeRef?
-        let focusedElementError = AXUIElementCopyAttributeValue(
-            applicationElement,
-            kAXFocusedUIElementAttribute as CFString,
-            &focusedElementValue
+        let focusedElementResult = elementAttribute(
+            kAXFocusedUIElementAttribute,
+            from: applicationElement
         )
+        let element: AXUIElement
 
-        guard
-            focusedElementError == .success,
-            let focusedElement = focusedElementValue
-        else {
-            throw WeChatInputReaderError.focusedElementUnavailable(focusedElementError)
-        }
-
-        let element = focusedElement as! AXUIElement
-        let role = try stringAttribute(kAXRoleAttribute, from: element) ?? "未知"
-        var valueIsSettable = DarwinBoolean(false)
-        let settableError = AXUIElementIsAttributeSettable(
-            element,
-            kAXValueAttribute as CFString,
-            &valueIsSettable
-        )
-
-        guard
-            Self.editableRoles.contains(role),
-            settableError == .success,
-            valueIsSettable.boolValue
-        else {
+        if
+            focusedElementResult.error == .success,
+            let focusedElement = focusedElementResult.element,
+            isEditable(focusedElement)
+        {
+            element = focusedElement
+        } else if let editableElement = editableElementInFocusedWindow(
+            of: applicationElement
+        ) {
+            element = editableElement
+        } else if focusedElementResult.error == .success {
+            let role = focusedElementResult.element
+                .flatMap { stringAttribute(kAXRoleAttribute, from: $0) } ?? "未知"
             throw WeChatInputReaderError.unsupportedRole(role)
+        } else if focusedElementResult.error == .noValue {
+            throw WeChatInputReaderError.editableElementUnavailable
+        } else {
+            throw WeChatInputReaderError.focusedElementUnavailable(
+                focusedElementResult.error
+            )
         }
 
-        guard let draft = try stringAttribute(kAXValueAttribute, from: element) else {
+        guard let draft = stringAttribute(kAXValueAttribute, from: element) else {
             throw WeChatInputReaderError.valueNotReadable
         }
 
@@ -94,10 +94,81 @@ struct SystemWeChatInputReader: WeChatInputReading {
         kAXComboBoxRole
     ]
 
+    private func editableElementInFocusedWindow(
+        of applicationElement: AXUIElement
+    ) -> AXUIElement? {
+        let focusedWindow = elementAttribute(
+            kAXFocusedWindowAttribute,
+            from: applicationElement
+        ).element
+
+        let root = focusedWindow ?? firstWindow(of: applicationElement)
+        guard let root else {
+            return nil
+        }
+
+        var queue = [root]
+        var firstEditableElement: AXUIElement?
+        var firstNonEmptyEditableElement: AXUIElement?
+        var visitedCount = 0
+
+        while !queue.isEmpty, visitedCount < 500 {
+            let element = queue.removeFirst()
+            visitedCount += 1
+
+            if isEditable(element) {
+                firstEditableElement = firstEditableElement ?? element
+
+                if boolAttribute(kAXFocusedAttribute, from: element) == true {
+                    return element
+                }
+
+                if
+                    firstNonEmptyEditableElement == nil,
+                    let value = stringAttribute(kAXValueAttribute, from: element),
+                    !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                {
+                    firstNonEmptyEditableElement = element
+                }
+            }
+
+            queue.append(contentsOf: elementArrayAttribute(
+                kAXChildrenAttribute,
+                from: element
+            ))
+        }
+
+        return firstNonEmptyEditableElement ?? firstEditableElement
+    }
+
+    private func firstWindow(of applicationElement: AXUIElement) -> AXUIElement? {
+        elementArrayAttribute(kAXWindowsAttribute, from: applicationElement)
+            .first(where: { boolAttribute(kAXMainAttribute, from: $0) == true })
+            ?? elementArrayAttribute(kAXWindowsAttribute, from: applicationElement).first
+    }
+
+    private func isEditable(_ element: AXUIElement) -> Bool {
+        guard
+            let role = stringAttribute(kAXRoleAttribute, from: element),
+            Self.editableRoles.contains(role)
+        else {
+            return false
+        }
+
+        var valueIsSettable = DarwinBoolean(false)
+        let settableError = AXUIElementIsAttributeSettable(
+            element,
+            kAXValueAttribute as CFString,
+            &valueIsSettable
+        )
+
+        return settableError == .success && valueIsSettable.boolValue
+    }
+
     private func stringAttribute(
         _ attribute: String,
         from element: AXUIElement
-    ) throws -> String? {
+    ) -> String? {
         var value: CFTypeRef?
         let error = AXUIElementCopyAttributeValue(
             element,
@@ -110,5 +181,59 @@ struct SystemWeChatInputReader: WeChatInputReading {
         }
 
         return value as? String
+    }
+
+    private func boolAttribute(
+        _ attribute: String,
+        from element: AXUIElement
+    ) -> Bool? {
+        var value: CFTypeRef?
+        let error = AXUIElementCopyAttributeValue(
+            element,
+            attribute as CFString,
+            &value
+        )
+
+        guard error == .success else {
+            return nil
+        }
+
+        return value as? Bool
+    }
+
+    private func elementAttribute(
+        _ attribute: String,
+        from element: AXUIElement
+    ) -> (element: AXUIElement?, error: AXError) {
+        var value: CFTypeRef?
+        let error = AXUIElementCopyAttributeValue(
+            element,
+            attribute as CFString,
+            &value
+        )
+
+        guard error == .success, let value else {
+            return (nil, error)
+        }
+
+        return (value as! AXUIElement, error)
+    }
+
+    private func elementArrayAttribute(
+        _ attribute: String,
+        from element: AXUIElement
+    ) -> [AXUIElement] {
+        var value: CFTypeRef?
+        let error = AXUIElementCopyAttributeValue(
+            element,
+            attribute as CFString,
+            &value
+        )
+
+        guard error == .success else {
+            return []
+        }
+
+        return value as? [AXUIElement] ?? []
     }
 }

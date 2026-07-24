@@ -114,18 +114,19 @@ final class AppState: ObservableObject {
         detectedFrontmostBundleIdentifier = detection.detectedBundleIdentifier
     }
 
-    func readWeChatDraft() {
+    @discardableResult
+    func readWeChatDraft() -> String {
         refreshAccessibilityStatus()
         refreshWeChatFrontmostStatus()
 
         guard accessibilityStatus == .authorized else {
             draftReadStatus = .failure("尚未获得辅助功能权限")
-            return
+            return draftReadStatus.title
         }
 
         guard weChatFrontmostStatus == .frontmost else {
             draftReadStatus = .failure("请先将微信切换到前台并点击输入框")
-            return
+            return draftReadStatus.title
         }
 
         do {
@@ -135,5 +136,7 @@ final class AppState: ObservableObject {
                 (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             )
         }
+
+        return draftReadStatus.title
     }
 }

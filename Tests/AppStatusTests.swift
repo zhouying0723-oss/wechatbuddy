@@ -100,6 +100,13 @@ final class AppStatusTests: XCTestCase {
         XCTAssertEqual(bundleIdentifier, "com.tencent.xinWeChat")
     }
 
+    func testNoFocusedValueHasActionableErrorMessage() {
+        XCTAssertEqual(
+            WeChatInputReaderError.editableElementUnavailable.errorDescription,
+            "在微信当前窗口中找不到可编辑输入框"
+        )
+    }
+
     @MainActor
     func testReadWeChatDraftShowsTextWhenRequirementsAreMet() {
         let state = AppState(
@@ -108,9 +115,10 @@ final class AppStatusTests: XCTestCase {
             weChatInputReader: WeChatInputReaderMock(result: .success("测试草稿"))
         )
 
-        state.readWeChatDraft()
+        let message = state.readWeChatDraft()
 
         XCTAssertEqual(state.draftReadStatus, .success("测试草稿"))
+        XCTAssertEqual(message, "读取成功：测试草稿")
     }
 
     @MainActor
@@ -122,12 +130,13 @@ final class AppStatusTests: XCTestCase {
             weChatInputReader: reader
         )
 
-        state.readWeChatDraft()
+        let message = state.readWeChatDraft()
 
         XCTAssertEqual(
             state.draftReadStatus,
             .failure("请先将微信切换到前台并点击输入框")
         )
+        XCTAssertEqual(message, "读取失败：请先将微信切换到前台并点击输入框")
         XCTAssertEqual(reader.readCount, 0)
     }
 }

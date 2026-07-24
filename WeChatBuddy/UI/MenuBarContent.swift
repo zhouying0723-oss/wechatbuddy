@@ -31,7 +31,7 @@ struct MenuBarContent: View {
         Divider()
 
         Button("读取微信输入框") {
-            appState.readWeChatDraft()
+            presentDraftReadResult(appState.readWeChatDraft())
         }
 
         Divider()
@@ -51,5 +51,16 @@ struct MenuBarContent: View {
             appState.refreshAccessibilityStatus()
             appState.refreshWeChatFrontmostStatus()
         }
+    }
+
+    private func presentDraftReadResult(_ message: String) {
+        let alert = NSAlert()
+        alert.messageText = "微信输入框读取结果"
+        alert.informativeText = message
+        alert.alertStyle = message.hasPrefix("读取成功") ? .informational : .warning
+        alert.addButton(withTitle: "确定")
+
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        alert.runModal()
     }
 }
