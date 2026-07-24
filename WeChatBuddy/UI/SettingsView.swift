@@ -2,12 +2,14 @@ import AppKit
 import SwiftUI
 
 struct SettingsView: View {
+    @ObservedObject private var appState: AppState
     @StateObject private var apiKeyModel: APIKeySettingsModel
     @StateObject private var providerModel: ModelProviderSettingsModel
     @StateObject private var connectionTestModel: ModelConnectionTestModel
     @StateObject private var rewritePreferencesModel: RewritePreferencesModel
 
     init(
+        appState: AppState,
         apiKeyStore: any APIKeyStoring = KeychainAPIKeyStore(),
         providerStore: any ModelProviderSettingsStoring =
             UserDefaultsModelProviderSettingsStore(),
@@ -15,6 +17,7 @@ struct SettingsView: View {
             UserDefaultsRewritePreferencesStore(),
         connectionTester: (any ModelConnectionTesting)? = nil
     ) {
+        self.appState = appState
         _apiKeyModel = StateObject(
             wrappedValue: APIKeySettingsModel(store: apiKeyStore)
         )
@@ -160,6 +163,20 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
             }
+
+            Section("安全诊断") {
+                Text(diagnosticReport.text)
+                    .font(.caption.monospaced())
+                    .textSelection(.enabled)
+
+                Button("复制安全诊断信息") {
+                    copyToPasteboard(diagnosticReport.text)
+                }
+
+                Text("诊断摘要不会包含 API Key、模型地址、微信草稿或模型回复。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .padding(12)
@@ -169,7 +186,16 @@ struct SettingsView: View {
             providerModel.refresh()
             apiKeyModel.refresh()
             rewritePreferencesModel.refresh()
+            appState.refreshAccessibilityStatus()
         }
+    }
+
+    private var diagnosticReport: DiagnosticReport {
+        DiagnosticReportFactory.make(
+            appState: appState,
+            apiKeyStatus: apiKeyModel.status,
+            providerStatus: providerModel.status
+        )
     }
 
     private var apiKeyStatusColor: Color {

@@ -11,7 +11,7 @@ struct WeChatBuddyApp: App {
         .menuBarExtraStyle(.menu)
 
         Settings {
-            SettingsView()
+            SettingsView(appState: appState)
         }
     }
 }
