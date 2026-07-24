@@ -13,6 +13,7 @@ struct MenuBarContent: View {
         Divider()
 
         Button("打开设置…") {
+            NSApplication.shared.activate(ignoringOtherApps: true)
             openSettings()
         }
 

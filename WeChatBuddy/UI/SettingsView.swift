@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct SettingsView: View {
@@ -8,5 +9,8 @@ struct SettingsView: View {
         }
         .padding(20)
         .frame(width: 420, height: 180)
+        .onAppear {
+            NSApplication.shared.activate(ignoringOtherApps: true)
+        }
     }
 }
