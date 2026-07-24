@@ -6,7 +6,7 @@ WeChatBuddy 是一个面向 macOS 的微信 AI 回复辅助工具。用户在微
 
 当前版本：`v0.7.1`
 
-当前阶段：阶段 2，Accessibility 集成。
+当前阶段：阶段 2 已完成，等待合并 `feature/accessibility`。
 
 ## 核心原则
 
